@@ -1,0 +1,6 @@
+-DMT=1
+-DOPENMP=1
+-DGUI=1
+-o
+/home/dalab/workspace/fluid/manta/build/pp/source/gui/moc_meshpainter.cpp
+/home/dalab/workspace/fluid/manta/build/pp/source/gui/meshpainter.h

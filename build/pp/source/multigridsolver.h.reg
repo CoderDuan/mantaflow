@@ -1,0 +1,16 @@
+#include "multigridsolver.h"
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","MultiGridSolver","PbClass"); template<> const char* Namify<MultiGridSolver >::S = "MultiGridSolver"; 
+>MultiGridSolver^
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","MultiGridSolver",MultiGridSolver::_W_0); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","getGridSize",MultiGridSolver::_W_1); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","printMemInfo",MultiGridSolver::_W_2); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","step",MultiGridSolver::_W_3); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","adaptTimestep",MultiGridSolver::_W_4); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","create",MultiGridSolver::_W_5); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","timestep",MultiGridSolver::_GET_mDt,MultiGridSolver::_SET_mDt); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","timeTotal",MultiGridSolver::_GET_mTimeTotal,MultiGridSolver::_SET_mTimeTotal); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","frame",MultiGridSolver::_GET_mFrame,MultiGridSolver::_SET_mFrame); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","cfl",MultiGridSolver::_GET_mCflCond,MultiGridSolver::_SET_mCflCond); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","timestepMin",MultiGridSolver::_GET_mDtMin,MultiGridSolver::_SET_mDtMin); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","timestepMax",MultiGridSolver::_GET_mDtMax,MultiGridSolver::_SET_mDtMax); 
++MultiGridSolver^ static const Pb::Register _R_$IDX$ ("MultiGridSolver","frameLength",MultiGridSolver::_GET_mFrameLength,MultiGridSolver::_SET_mFrameLength); 
