@@ -89,6 +89,13 @@ for i in range(resC):
 		tmp.append(fineSolver.create(RealGrid))
 	fuelF.append(tmp)
 
+heatF = []
+for i in range(resC):
+	tmp = []
+	for j in range(resC):
+		tmp.append(fineSolver.create(RealGrid))
+	heatF.append(tmp)
+
 flameF = []
 for i in range(resC):
 	tmp = []
@@ -132,7 +139,7 @@ if (GUI):
 	#gui.pause()
 
 # source: cube in center of domain (x, y), standing on bottom of the domain
-boxSize = vec3(res/8, 0.05*res, res/8)
+boxSize = vec3(res/8, res/20, res/8)
 boxCenter = gs*vec3(0.5, 0.15, 0.5)
 sourceBox = s.create( Box, center=boxCenter, size=boxSize )
 
@@ -147,6 +154,10 @@ while s.frame < frames:
 		densityInflow( flags=flags, density=heat, noise=noise, shape=sourceBox, scale=1, sigma=0.5 )
 		densityInflow( flags=flags, density=fuel, noise=noise, shape=sourceBox, scale=1, sigma=0.5 )
 		densityInflow( flags=flags, density=react, noise=noise, shape=sourceBox, scale=1, sigma=0.5 )
+		idxX = resC/2
+		idxY = resC/5
+		densityInflow( flags=flagsF[idxX][idxY], density=densityF[idxX][idxY],
+			noise=noise, shape=sourceBox, scale=1, sigma=0.5)
 
 	processBurn( fuel=fuel, density=density, react=react, heat=heat )
 
@@ -155,6 +166,20 @@ while s.frame < frames:
 	advectSemiLagrange( flags=flags, vel=vel, grid=fuel,   order=2 )
 	advectSemiLagrange( flags=flags, vel=vel, grid=react, order=2 )
 	advectSemiLagrange( flags=flags, vel=vel, grid=vel,   order=2, openBounds=doOpen, boundaryWidth=bWidth )
+	
+	advectSemiLagrange( flags=flagsC, vel=velC, grid=densityC, order=2 )
+	advectSemiLagrange( flags=flagsC, vel=velC, grid=heatC,   order=2 )
+	advectSemiLagrange( flags=flagsC, vel=velC, grid=fuelC,   order=2 )
+	advectSemiLagrange( flags=flagsC, vel=velC, grid=reactC, order=2 )
+	advectSemiLagrange( flags=flagsC, vel=velC, grid=velC,   order=2, openBounds=doOpen, boundaryWidth=bWidth )
+	
+	# for i in range(resC):
+	# 	for j in range(resC):
+	# 		advectSemiLagrange( flags=flagsF[i][j], vel=velF[i][j], grid=densityF[i][j], order=2 )
+	# 		advectSemiLagrange( flags=flagsF[i][j], vel=velF[i][j], grid=heatF[i][j],   order=2 )
+	# 		advectSemiLagrange( flags=flagsF[i][j], vel=velF[i][j], grid=fuelF[i][j],   order=2 )
+	# 		advectSemiLagrange( flags=flagsF[i][j], vel=velF[i][j], grid=reactF[i][j], order=2 )
+	# 		advectSemiLagrange( flags=flagsF[i][j], vel=velF[i][j], grid=velF[i][j],   order=2, openBounds=doOpen, boundaryWidth=bWidth )
 
 	if doOpen:
 		resetOutflow( flags=flags, real=density )
@@ -174,6 +199,6 @@ while s.frame < frames:
 	else:
 		density.copyFromFine(0,0,0, densityC, int(gs.x), int(gs.y), int(gs.z))
 
-	#timings.display()
+	timings.display()
 	s.step()
 

@@ -88,6 +88,18 @@ protected:
 	GridStorage<Real> mGridsReal;
 	GridStorage<Vec3> mGridsVec;
 
+public:
+	FluidSolver* coarseGridSolver;
+	std::vector<FluidSolver*> fineGridSolvers;
+	void initMultiGrid(Vec3i coarseGridSize, Vec3i fineGridSize);
+	PYTHON() void caculateFineGrid();
+	PYTHON() void caculateCoarseGrid();
+	PYTHON() void caculateGlobalGrid();
+
+protected:
+	Vec3i mCoarseGridSize;
+	Vec3i mFineGridSize;
+
 
 	//! 4d data section, only required for simulations working with space-time data 
 
