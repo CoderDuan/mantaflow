@@ -9,7 +9,7 @@
 
 
 
-#line 1 "/home/dalab/workspace/fluid/manta/source/fluidsolver.h"
+#line 1 "/home/dalab/workspace/fluid/myManta/source/fluidsolver.h"
 /******************************************************************************
  *
  * MantaFlow fluid solver framework
@@ -98,6 +98,18 @@ protected:
 	GridStorage<int>  mGridsInt;
 	GridStorage<Real> mGridsReal;
 	GridStorage<Vec3> mGridsVec;
+
+public:
+	FluidSolver* coarseGridSolver;
+	std::vector<FluidSolver*> fineGridSolvers;
+	void initMultiGrid(Vec3i coarseGridSize, Vec3i fineGridSize);
+	void caculateFineGrid(); static PyObject* _W_6 (PyObject* _self, PyObject* _linargs, PyObject* _kwds) { try { PbArgs _args(_linargs, _kwds); FluidSolver* pbo = dynamic_cast<FluidSolver*>(Pb::objFromPy(_self)); bool noTiming = _args.getOpt<bool>("notiming", -1, 0); pbPreparePlugin(pbo->getParent(), "FluidSolver::caculateFineGrid" , !noTiming); PyObject *_retval = 0; { ArgLocker _lock;  pbo->_args.copy(_args);  _retval = getPyNone(); pbo->caculateFineGrid();  pbo->_args.check(); } pbFinalizePlugin(pbo->getParent(),"FluidSolver::caculateFineGrid" , !noTiming); return _retval; } catch(std::exception& e) { pbSetError("FluidSolver::caculateFineGrid",e.what()); return 0; } }
+	void caculateCoarseGrid(); static PyObject* _W_7 (PyObject* _self, PyObject* _linargs, PyObject* _kwds) { try { PbArgs _args(_linargs, _kwds); FluidSolver* pbo = dynamic_cast<FluidSolver*>(Pb::objFromPy(_self)); bool noTiming = _args.getOpt<bool>("notiming", -1, 0); pbPreparePlugin(pbo->getParent(), "FluidSolver::caculateCoarseGrid" , !noTiming); PyObject *_retval = 0; { ArgLocker _lock;  pbo->_args.copy(_args);  _retval = getPyNone(); pbo->caculateCoarseGrid();  pbo->_args.check(); } pbFinalizePlugin(pbo->getParent(),"FluidSolver::caculateCoarseGrid" , !noTiming); return _retval; } catch(std::exception& e) { pbSetError("FluidSolver::caculateCoarseGrid",e.what()); return 0; } }
+	void caculateGlobalGrid(); static PyObject* _W_8 (PyObject* _self, PyObject* _linargs, PyObject* _kwds) { try { PbArgs _args(_linargs, _kwds); FluidSolver* pbo = dynamic_cast<FluidSolver*>(Pb::objFromPy(_self)); bool noTiming = _args.getOpt<bool>("notiming", -1, 0); pbPreparePlugin(pbo->getParent(), "FluidSolver::caculateGlobalGrid" , !noTiming); PyObject *_retval = 0; { ArgLocker _lock;  pbo->_args.copy(_args);  _retval = getPyNone(); pbo->caculateGlobalGrid();  pbo->_args.check(); } pbFinalizePlugin(pbo->getParent(),"FluidSolver::caculateGlobalGrid" , !noTiming); return _retval; } catch(std::exception& e) { pbSetError("FluidSolver::caculateGlobalGrid",e.what()); return 0; } }
+
+protected:
+	Vec3i mCoarseGridSize;
+	Vec3i mFineGridSize;
 
 
 	//! 4d data section, only required for simulations working with space-time data 

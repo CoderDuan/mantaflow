@@ -2,5 +2,5 @@
 -DOPENMP=1
 -DGUI=1
 -o
-/home/dalab/workspace/fluid/manta/build/pp/source/gui/moc_painter.cpp
-/home/dalab/workspace/fluid/manta/build/pp/source/gui/painter.h
+/home/dalab/workspace/fluid/myManta/build/pp/source/gui/moc_painter.cpp
+/home/dalab/workspace/fluid/myManta/build/pp/source/gui/painter.h

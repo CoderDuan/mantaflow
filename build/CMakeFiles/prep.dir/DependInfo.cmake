@@ -4,14 +4,14 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/dalab/workspace/fluid/manta/source/preprocessor/code.cpp" "/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir/source/preprocessor/code.cpp.o"
-  "/home/dalab/workspace/fluid/manta/source/preprocessor/codegen_kernel.cpp" "/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir/source/preprocessor/codegen_kernel.cpp.o"
-  "/home/dalab/workspace/fluid/manta/source/preprocessor/codegen_python.cpp" "/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir/source/preprocessor/codegen_python.cpp.o"
-  "/home/dalab/workspace/fluid/manta/source/preprocessor/main.cpp" "/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir/source/preprocessor/main.cpp.o"
-  "/home/dalab/workspace/fluid/manta/source/preprocessor/merge.cpp" "/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir/source/preprocessor/merge.cpp.o"
-  "/home/dalab/workspace/fluid/manta/source/preprocessor/parse.cpp" "/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir/source/preprocessor/parse.cpp.o"
-  "/home/dalab/workspace/fluid/manta/source/preprocessor/tokenize.cpp" "/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir/source/preprocessor/tokenize.cpp.o"
-  "/home/dalab/workspace/fluid/manta/source/preprocessor/util.cpp" "/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir/source/preprocessor/util.cpp.o"
+  "/home/dalab/workspace/fluid/myManta/source/preprocessor/code.cpp" "/home/dalab/workspace/fluid/myManta/build/CMakeFiles/prep.dir/source/preprocessor/code.cpp.o"
+  "/home/dalab/workspace/fluid/myManta/source/preprocessor/codegen_kernel.cpp" "/home/dalab/workspace/fluid/myManta/build/CMakeFiles/prep.dir/source/preprocessor/codegen_kernel.cpp.o"
+  "/home/dalab/workspace/fluid/myManta/source/preprocessor/codegen_python.cpp" "/home/dalab/workspace/fluid/myManta/build/CMakeFiles/prep.dir/source/preprocessor/codegen_python.cpp.o"
+  "/home/dalab/workspace/fluid/myManta/source/preprocessor/main.cpp" "/home/dalab/workspace/fluid/myManta/build/CMakeFiles/prep.dir/source/preprocessor/main.cpp.o"
+  "/home/dalab/workspace/fluid/myManta/source/preprocessor/merge.cpp" "/home/dalab/workspace/fluid/myManta/build/CMakeFiles/prep.dir/source/preprocessor/merge.cpp.o"
+  "/home/dalab/workspace/fluid/myManta/source/preprocessor/parse.cpp" "/home/dalab/workspace/fluid/myManta/build/CMakeFiles/prep.dir/source/preprocessor/parse.cpp.o"
+  "/home/dalab/workspace/fluid/myManta/source/preprocessor/tokenize.cpp" "/home/dalab/workspace/fluid/myManta/build/CMakeFiles/prep.dir/source/preprocessor/tokenize.cpp.o"
+  "/home/dalab/workspace/fluid/myManta/source/preprocessor/util.cpp" "/home/dalab/workspace/fluid/myManta/build/CMakeFiles/prep.dir/source/preprocessor/util.cpp.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -37,8 +37,8 @@ SET(CMAKE_C_TARGET_INCLUDE_PATH
   "../source/pwrapper"
   "../source/cuda"
   "../source/util"
-  "/usr/include/python2.7"
-  "/usr/include/x86_64-linux-gnu/python2.7"
+  "/usr/include/python3.4m"
+  "/usr/include/x86_64-linux-gnu/python3.4m"
   "../dependencies/zlib-1.2.8"
   "."
   "pp/source/gui"

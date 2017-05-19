@@ -9,7 +9,7 @@
 
 
 
-#line 1 "/home/dalab/workspace/fluid/manta/source/fluidsolver.cpp"
+#line 1 "/home/dalab/workspace/fluid/myManta/source/fluidsolver.cpp"
 /******************************************************************************
  *
  * MantaFlow fluid solver framework
@@ -137,6 +137,31 @@ FluidSolver::~FluidSolver() {
 	mGrids4dReal.free();
 	mGrids4dVec.free();
 	mGrids4dVec4.free();
+}
+
+void FluidSolver::initMultiGrid(Vec3i coarseGridSize, Vec3i fineGridSize) {
+	mCoarseGridSize = coarseGridSize;
+	mFineGridSize = fineGridSize;
+	for (int i = 0; i < coarseGridSize.x; i++) {
+		for (int j = 0; j < fineGridSize.y; j++) {
+			for (int k = 0; k < coarseGridSize.z; k++) {
+				FluidSolver* fineSolver = new FluidSolver(fineGridSize, mDim, mFourthDim);
+				fineGridSolvers.push_back(fineSolver);
+			}
+		}
+	}
+}
+
+void FluidSolver::caculateFineGrid() {
+
+}
+
+void FluidSolver::caculateCoarseGrid() {
+	
+}
+
+void FluidSolver::caculateGlobalGrid() {
+
 }
 
 PbClass* FluidSolver::create(PbType t, PbTypeVec T, const string& name) {        

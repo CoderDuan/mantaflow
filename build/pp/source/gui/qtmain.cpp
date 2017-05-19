@@ -9,7 +9,7 @@
 
 
 
-#line 1 "/home/dalab/workspace/fluid/manta/source/gui/qtmain.cpp"
+#line 1 "/home/dalab/workspace/fluid/myManta/source/gui/qtmain.cpp"
 /******************************************************************************
  *
  * MantaFlow fluid solver framework

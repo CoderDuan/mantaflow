@@ -9,7 +9,7 @@
 
 
 
-#line 1 "/home/dalab/workspace/fluid/manta/source/gui/mainwindow.h"
+#line 1 "/home/dalab/workspace/fluid/myManta/source/gui/mainwindow.h"
 /******************************************************************************
  *
  * MantaFlow fluid solver framework

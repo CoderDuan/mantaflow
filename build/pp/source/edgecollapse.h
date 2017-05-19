@@ -9,7 +9,7 @@
 
 
 
-#line 1 "/home/dalab/workspace/fluid/manta/source/edgecollapse.h"
+#line 1 "/home/dalab/workspace/fluid/myManta/source/edgecollapse.h"
 /******************************************************************************
  *
  * MantaFlow fluid solver framework
