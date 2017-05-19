@@ -16,6 +16,7 @@ if dim==2:
 	gsC.z=1
 	gsF.z=1
 
+multiSolver = MultiGridSolver(name='multiGrid', gridSize=gs, dim=dim)
 s = Solver(name='main', gridSize = gs, dim=dim)
 coarseSolver = Solver(name='coarse', gridSize = gs, dim=dim)
 fineSolver = Solver(name='fine', gridSize = gsC, dim=dim)
@@ -154,8 +155,8 @@ while s.frame < frames:
 		densityInflow( flags=flags, density=heat, noise=noise, shape=sourceBox, scale=1, sigma=0.5 )
 		densityInflow( flags=flags, density=fuel, noise=noise, shape=sourceBox, scale=1, sigma=0.5 )
 		densityInflow( flags=flags, density=react, noise=noise, shape=sourceBox, scale=1, sigma=0.5 )
-		idxX = resC/2
-		idxY = resC/5
+		idxX = int(resC/2)
+		idxY = int(resC/5)
 		densityInflow( flags=flagsF[idxX][idxY], density=densityF[idxX][idxY],
 			noise=noise, shape=sourceBox, scale=1, sigma=0.5)
 
