@@ -154,6 +154,7 @@ SET(PP_SOURCES
 	source/fluidsolver.cpp
 	source/conjugategrad.cpp
 	source/multigrid.cpp
+	source/multigridsolver.cpp
 	source/grid.cpp
 	source/grid4d.cpp
 	source/levelset.cpp
@@ -192,6 +193,7 @@ SET(PP_HEADERS
 	source/commonkernels.h
 	source/conjugategrad.h
 	source/multigrid.h
+	source/multigridsolver.h
 	source/fastmarch.h
 	source/fluidsolver.h
 	source/grid.h

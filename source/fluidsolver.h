@@ -91,10 +91,10 @@ protected:
 public:
 	FluidSolver* coarseGridSolver;
 	std::vector<FluidSolver*> fineGridSolvers;
-	void initMultiGrid(Vec3i coarseGridSize, Vec3i fineGridSize);
-	PYTHON() void caculateFineGrid();
-	PYTHON() void caculateCoarseGrid();
-	PYTHON() void caculateGlobalGrid();
+	// void initMultiGrid(Vec3i coarseGridSize, Vec3i fineGridSize);
+	// PYTHON() void caculateFineGrid();
+	// PYTHON() void caculateCoarseGrid();
+	// PYTHON() void caculateGlobalGrid();
 
 protected:
 	Vec3i mCoarseGridSize;
