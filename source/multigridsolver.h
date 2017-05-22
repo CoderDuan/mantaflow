@@ -4,14 +4,16 @@
 #include "fluidsolver.h"
 #include "grid.h"
 
+using namespace std;
+
 namespace Manta {
 
 PYTHON(name=MultiGridSolver)
 class MultiGridSolver : public FluidSolver {
 public:
-	PYTHON() MultiGridSolver(Vec3i gridSize, int dim=3);
+	PYTHON() MultiGridSolver(Vec3i coarseGridSize, Vec3i fineGridSize, int dim=3);
 
-	PYTHON() void initMultiGrid();
+	PYTHON() void initMultiGrid(int dim);
 
 	PYTHON() PbClass* createFlagGrid();
 	PYTHON() PbClass* createVelGrid();
@@ -25,7 +27,7 @@ public:
 protected:
 	FluidSolver* mGlobalSolver;
 	FluidSolver* mCoarseSolver;
-	FluidSolver* mFineSolverList;
+	FluidSolver* mFineSolver;
 
 	Vec3i mGlobalSize;
 	Vec3i mCoarseSize;
@@ -40,7 +42,23 @@ protected:
 	Grid<Real>* mFlame;
 	Grid<Real>* mPressure;
 
+	FlagGrid* mCoarseFlags;
+	MACGrid* mCoarseVel;
+	Grid<Real>* mCoarseDensity;
+	Grid<Real>* mCoarseReact;
+	Grid<Real>* mCoarseFuel;
+	Grid<Real>* mCoarseHeat;
+	Grid<Real>* mCoarseFlame;
+	Grid<Real>* mCoarsePressure;
 
+	vector<FlagGrid*> mFineFlags;
+	vector<MACGrid*> mFineVel;
+	vector<Grid<Real>*> mFineDensity;
+	vector<Grid<Real>*> mFineReact;
+	vector<Grid<Real>*> mFineFuel;
+	vector<Grid<Real>*> mFineHeat;
+	vector<Grid<Real>*> mFineFlame;
+	vector<Grid<Real>*> mFinePressure;
 
 };
 
