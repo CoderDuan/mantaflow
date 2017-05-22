@@ -11,10 +11,13 @@ MultiGridSolver::MultiGridSolver(Vec3i cgs, Vec3i fgs, int dim)
 	mGlobalSize = Vec3i(cgs.x*fgs.x, cgs.y*fgs.y, cgs.z*fgs.z);
 	mCoarseSize = cgs;
 	mFineSize = fgs;
-	initMultiGrid(dim);
+	//initMultiGrid(dim);
+	mCoarseSolver = new FluidSolver(mCoarseSize, dim, -1);
+	mFineSolver = new FluidSolver(mFineSize, dim, -1);
 }
 
 void MultiGridSolver::initMultiGrid(int dim) {
+
 	PbType pt;
 	pt.S = "FlagGrid";
 	mFlags = (FlagGrid*)create(pt, PbTypeVec(), "");
@@ -33,12 +36,14 @@ void MultiGridSolver::initMultiGrid(int dim) {
 	pt.S = "RealGrid";
 	mPressure = (Grid<Real>*)create(pt, PbTypeVec(), "");
 
-	mCoarseSolver = new FluidSolver(mCoarseSize, dim, -1);
-	mFineSolver = new FluidSolver(mFineSize, dim, -1);
+	if (mCoarseSolver == NULL)
+		return;
 
 	// coarse grids:
 	pt.S = "FlagGrid";
-	mCoarseFlags = (FlagGrid*)mCoarseSolver->create(pt, PbTypeVec(), "");
+	printf("!!!!!!!!!!\n");
+	mCoarseFlags = (FlagGrid*)mCoarseSolver->create(pt);
+	printf("!!!!!!!!!!\n");
 	pt.S = "MACGrid";
 	mCoarseVel = (MACGrid*)mCoarseSolver->create(pt, PbTypeVec(), "");
 	pt.S = "RealGrid";
@@ -54,26 +59,28 @@ void MultiGridSolver::initMultiGrid(int dim) {
 	pt.S = "RealGrid";
 	mCoarsePressure = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
 
+	printf("!!!!!!!\n");
+
 	// fine grids:
 	for (int i = 0; i < mCoarseSize.x; i++) {
 		for (int j = 0; j < mCoarseSize.y; j++) {
 			for (int k = 0; k < mCoarseSize.z; k++) {
-					pt.S = "FlagGrid";
-					mFineFlags.push_back((FlagGrid*)mFineSolver->create(pt, PbTypeVec(), ""));
-					pt.S = "MACGrid";
-					mFineVel.push_back((MACGrid*)mFineSolver->create(pt, PbTypeVec(), ""));
-					pt.S = "RealGrid";
-					mFineDensity.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-					pt.S = "RealGrid";
-					mFineReact.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-					pt.S = "RealGrid";
-					mFineFuel.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-					pt.S = "RealGrid";
-					mFineHeat.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-					pt.S = "RealGrid";
-					mFineFlame.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-					pt.S = "RealGrid";
-					mFinePressure.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
+				pt.S = "FlagGrid";
+				mFineFlags.push_back((FlagGrid*)mFineSolver->create(pt, PbTypeVec(), ""));
+				pt.S = "MACGrid";
+				mFineVel.push_back((MACGrid*)mFineSolver->create(pt, PbTypeVec(), ""));
+				pt.S = "RealGrid";
+				mFineDensity.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
+				pt.S = "RealGrid";
+				mFineReact.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
+				pt.S = "RealGrid";
+				mFineFuel.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
+				pt.S = "RealGrid";
+				mFineHeat.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
+				pt.S = "RealGrid";
+				mFineFlame.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
+				pt.S = "RealGrid";
+				mFinePressure.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
 			}
 		}
 	}
