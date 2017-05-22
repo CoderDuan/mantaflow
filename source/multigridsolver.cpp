@@ -1,5 +1,9 @@
 #include "multigridsolver.h"
+#include "grid.h"
+#include <sstream>
+#include <fstream>
 
+using namespace std;
 namespace Manta {
 
 MultiGridSolver::MultiGridSolver(Vec3i gridSize, int dim)
@@ -8,38 +12,55 @@ MultiGridSolver::MultiGridSolver(Vec3i gridSize, int dim)
 }
 
 void MultiGridSolver::initMultiGrid() {
-	
+	PbType pt;
+	pt.S = "FlagGrid";
+	mFlags = (FlagGrid*)create(pt, PbTypeVec(), "");
+	pt.S = "MACGrid";
+	mVel = (MACGrid*)create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mDensity = (Grid<Real>*)create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mReact = (Grid<Real>*)create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mFuel = (Grid<Real>*)create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mHeat = (Grid<Real>*)create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mFlame = (Grid<Real>*)create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mPressure = (Grid<Real>*)create(pt, PbTypeVec(), "");
 }
 
 PbClass* MultiGridSolver::createFlagGrid() {
-	PbType t;
-	t.S = "FlagGrid";
-	mFlags = (FlagGrid*)create(t);
 	return mFlags;
 }
 
+PbClass* MultiGridSolver::createVelGrid() {
+	return mVel;
+}
+
 PbClass* MultiGridSolver::createDensityGrid() {
-	return NULL;
+	return mDensity;
 }
 
 PbClass* MultiGridSolver::createReactGrid() {
-	return NULL;
+	return mReact;
 }
 
 PbClass* MultiGridSolver::createFuelGrid() {
-	return NULL;
+	return mFuel;
 }
 
 PbClass* MultiGridSolver::createHeatGrid() {
-	return NULL;
+	return mHeat;
 }
 
 PbClass* MultiGridSolver::createFlameGrid() {
-	return NULL;
+	return mFlame;
 }
 
 PbClass* MultiGridSolver::createPressureGrid() {
-	return NULL;
+	return mPressure;
 }
 
 }

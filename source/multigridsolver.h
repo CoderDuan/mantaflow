@@ -14,6 +14,7 @@ public:
 	PYTHON() void initMultiGrid();
 
 	PYTHON() PbClass* createFlagGrid();
+	PYTHON() PbClass* createVelGrid();
 	PYTHON() PbClass* createDensityGrid();
 	PYTHON() PbClass* createReactGrid();
 	PYTHON() PbClass* createFuelGrid();
@@ -24,7 +25,7 @@ public:
 protected:
 	FluidSolver* mGlobalSolver;
 	FluidSolver* mCoarseSolver;
-	std::vector<FluidSolver*> mFineSolverList;
+	FluidSolver* mFineSolverList;
 
 	Vec3i mGlobalSize;
 	Vec3i mCoarseSize;
@@ -38,6 +39,8 @@ protected:
 	Grid<Real>* mHeat;
 	Grid<Real>* mFlame;
 	Grid<Real>* mPressure;
+
+
 
 };
 
