@@ -35,8 +35,13 @@ flame = s.create(RealGrid)
 pressure = s.create(RealGrid)
 doOpen = True
 
+resC = 2
+resF = 2
+gsC = vec3(resC, resC, resC)
+gsF = vec3(resF, resF, resF)
 
-ms = MultiGridSolver(name='MultiGridSolver', gridSize=gs, dim=dim)
+ms = MultiGridSolver(name='MultiGridSolver', coarseGridSize=gsC, fineGridSize=gsF, dim=dim)
+ms.initMultiGrid(dim)
 ms.createFlagGrid()
 
 # how many frames to calculate 
