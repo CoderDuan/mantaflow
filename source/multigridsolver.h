@@ -15,6 +15,8 @@ public:
 
 	PYTHON() void initMultiGrid(int dim);
 
+	PYTHON() void setMultiGridSolver(FluidSolver* coarseGridSolver, FluidSolver* fineGridSolver);
+
 	PYTHON() PbClass* createFlagGrid();
 	PYTHON() PbClass* createVelGrid();
 	PYTHON() PbClass* createDensityGrid();

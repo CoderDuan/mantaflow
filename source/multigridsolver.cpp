@@ -11,9 +11,13 @@ MultiGridSolver::MultiGridSolver(Vec3i cgs, Vec3i fgs, int dim)
 	mGlobalSize = Vec3i(cgs.x*fgs.x, cgs.y*fgs.y, cgs.z*fgs.z);
 	mCoarseSize = cgs;
 	mFineSize = fgs;
-	//initMultiGrid(dim);
-	mCoarseSolver = new FluidSolver(mCoarseSize, dim, -1);
-	mFineSolver = new FluidSolver(mFineSize, dim, -1);
+}
+
+void MultiGridSolver::setMultiGridSolver(FluidSolver* cs, FluidSolver* fs) {
+	if (cs->getGridSize() != mCoarseSize || fs->getGridSize() != mFineSize)
+		printf("Invalid Coarse/Fine Solver grid size!\n");
+	mCoarseSolver = cs;
+	mFineSolver = fs;
 }
 
 void MultiGridSolver::initMultiGrid(int dim) {
@@ -41,9 +45,7 @@ void MultiGridSolver::initMultiGrid(int dim) {
 
 	// coarse grids:
 	pt.S = "FlagGrid";
-	printf("!!!!!!!!!!\n");
-	mCoarseFlags = (FlagGrid*)mCoarseSolver->create(pt);
-	printf("!!!!!!!!!!\n");
+	mCoarseFlags = (FlagGrid*)mCoarseSolver->create(pt, PbTypeVec(), "mCoarseFlags");
 	pt.S = "MACGrid";
 	mCoarseVel = (MACGrid*)mCoarseSolver->create(pt, PbTypeVec(), "");
 	pt.S = "RealGrid";
@@ -58,8 +60,6 @@ void MultiGridSolver::initMultiGrid(int dim) {
 	mCoarseFlame = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
 	pt.S = "RealGrid";
 	mCoarsePressure = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
-
-	printf("!!!!!!!\n");
 
 	// fine grids:
 	for (int i = 0; i < mCoarseSize.x; i++) {
