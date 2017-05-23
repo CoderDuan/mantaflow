@@ -41,6 +41,9 @@ gsC = vec3(resC, resC, resC)
 gsF = vec3(resF, resF, resF)
 
 ms = MultiGridSolver(name='MultiGridSolver', coarseGridSize=gsC, fineGridSize=gsF, dim=dim)
+csolver = Solver(name='CoarseSolver', gridSize=gsC, dim=dim)
+fsolver = Solver(name='FineSolver', gridSize=gsF, dim=dim)
+ms.setMultiGridSolver(csolver, fsolver);
 ms.initMultiGrid(dim)
 ms.createFlagGrid()
 
