@@ -1,8 +1,9 @@
 #ifndef _MULTIGRIDSOLVER_H
 #define _MULTIGRIDSOLVER_H
 
-#include "fluidsolver.h"
 #include "grid.h"
+#include "fluidsolver.h"
+
 
 using namespace std;
 
@@ -17,14 +18,31 @@ public:
 
 	PYTHON() void setMultiGridSolver(FluidSolver* coarseGridSolver, FluidSolver* fineGridSolver);
 
-	PYTHON() PbClass* createFlagGrid();
-	PYTHON() PbClass* createVelGrid();
-	PYTHON() PbClass* createDensityGrid();
-	PYTHON() PbClass* createReactGrid();
-	PYTHON() PbClass* createFuelGrid();
-	PYTHON() PbClass* createHeatGrid();
-	PYTHON() PbClass* createFlameGrid();
-	PYTHON() PbClass* createPressureGrid();
+	PYTHON() void advectCoarseGrid();
+	PYTHON() void calculateCoarseGrid();
+	PYTHON() void solveCoarseGrid();
+
+	PYTHON() void advectFineGrid();
+	PYTHON() void calculateFineGrid();
+	PYTHON() void solveFineGrid();
+
+	PYTHON() PbClass* getFlagsObj();
+	PYTHON() PbClass* getVelObj();
+	PYTHON() PbClass* getDensityObj();
+	PYTHON() PbClass* getReactObj();
+	PYTHON() PbClass* getFuelObj();
+	PYTHON() PbClass* getHeatObj();
+	PYTHON() PbClass* getFlameObj();
+	PYTHON() PbClass* getPressureObj();
+
+	FlagGrid* getFlagsGrid() {return mFlags;}
+	MACGrid* getVelGrid() {return mVel;}
+	Grid<Real>* getDensityGrid() {return mDensity;}
+	Grid<Real>* getReactGrid() {return mReact;}
+	Grid<Real>* getFuelGrid() {return mFuel;}
+	Grid<Real>* getHeatGrid() {return mHeat;}
+	Grid<Real>* getFlameGrid() {return mFlame;}
+	Grid<Real>* getPressureGrid() {return mPressure;}
 
 protected:
 	FluidSolver* mGlobalSolver;

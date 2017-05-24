@@ -127,37 +127,11 @@ FluidSolver::~FluidSolver() {
 	mGrids4dVec4.free();
 }
 
-// void FluidSolver::initMultiGrid(Vec3i coarseGridSize, Vec3i fineGridSize) {
-// 	mCoarseGridSize = coarseGridSize;
-// 	mFineGridSize = fineGridSize;
-// 	for (int i = 0; i < coarseGridSize.x; i++) {
-// 		for (int j = 0; j < fineGridSize.y; j++) {
-// 			for (int k = 0; k < coarseGridSize.z; k++) {
-// 				FluidSolver* fineSolver = new FluidSolver(fineGridSize, mDim, mFourthDim);
-// 				fineGridSolvers.push_back(fineSolver);
-// 			}
-// 		}
-// 	}
-// }
-
-// void FluidSolver::caculateFineGrid() {
-
-// }
-
-// void FluidSolver::caculateCoarseGrid() {
-
-// }
-
-// void FluidSolver::caculateGlobalGrid() {
-
-// }
-
 PbClass* FluidSolver::create(PbType t, PbTypeVec T, const string& name) {        
 #	if NOPYTHON!=1
 	_args.add("nocheck",true);
 	if (t.str() == "")
 		errMsg("Need to specify object type. Use e.g. Solver.create(FlagGrid, ...) or Solver.create(type=FlagGrid, ...)");
-	//printf("%s,%s,\n", (t.str() + T.str()).c_str(), name.c_str());
 	PbClass* ret = PbClass::createPyObject(t.str() + T.str(), name, _args, this);
 #	else
 	PbClass* ret = NULL;

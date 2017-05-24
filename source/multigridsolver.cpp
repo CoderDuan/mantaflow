@@ -87,36 +87,61 @@ void MultiGridSolver::initMultiGrid(int dim) {
 
 }
 
-PbClass* MultiGridSolver::createFlagGrid() {
-	return mFlags;
+PbClass* MultiGridSolver::getFlagsObj() {
+	return (PbClass*)mFlags;
 }
 
-PbClass* MultiGridSolver::createVelGrid() {
-	return mVel;
+PbClass* MultiGridSolver::getVelObj() {
+	return (PbClass*)mVel;
 }
 
-PbClass* MultiGridSolver::createDensityGrid() {
-	return mDensity;
+PbClass* MultiGridSolver::getDensityObj() {
+	return (PbClass*)mDensity;
 }
 
-PbClass* MultiGridSolver::createReactGrid() {
-	return mReact;
+PbClass* MultiGridSolver::getReactObj() {
+	return (PbClass*)mReact;
 }
 
-PbClass* MultiGridSolver::createFuelGrid() {
-	return mFuel;
+PbClass* MultiGridSolver::getFuelObj() {
+	return (PbClass*)mFuel;
 }
 
-PbClass* MultiGridSolver::createHeatGrid() {
-	return mHeat;
+PbClass* MultiGridSolver::getHeatObj() {
+	return (PbClass*)mHeat;
 }
 
-PbClass* MultiGridSolver::createFlameGrid() {
-	return mFlame;
+PbClass* MultiGridSolver::getFlameObj() {
+	return (PbClass*)mFlame;
 }
 
-PbClass* MultiGridSolver::createPressureGrid() {
-	return mPressure;
+PbClass* MultiGridSolver::getPressureObj() {
+	return (PbClass*)mPressure;
+}
+
+
+void MultiGridSolver::advectCoarseGrid() {
+
+}
+
+void MultiGridSolver::calculateCoarseGrid() {
+
+}
+
+void MultiGridSolver::solveCoarseGrid() {
+
+}
+
+void MultiGridSolver::advectFineGrid() {
+
+}
+
+void MultiGridSolver::calculateFineGrid() {
+
+}
+
+void MultiGridSolver::solveFineGrid() {
+
 }
 
 }
