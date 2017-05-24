@@ -14,6 +14,7 @@
 #include "vectorbase.h"
 #include "grid.h"
 #include "kernel.h"
+#include "multigridsolver.h"
 #include <limits>
 
 using namespace std;
@@ -423,6 +424,17 @@ PYTHON() void advectSemiLagrange (FlagGrid* flags, MACGrid* vel, GridBase* grid,
 	}
 	else
 		errMsg("AdvectSemiLagrange: Grid Type is not supported (only Real, Vec3, MAC, Levelset)");    
+}
+
+PYTHON() void advectCoarseGridSL (MultiGridSolver* mgs, int order = 1,
+								Real strength = 1.0, int orderSpace = 1, bool openBounds = false,
+								int boundaryWidth = 1) {
+	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getDensityGrid(), 2);
+	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getHeatGrid(), 2);
+	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getFuelGrid(), 2);
+	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getReactGrid(), 2);
+	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getVelGrid(), 2);
+	return;
 }
 
 } // end namespace DDF 
