@@ -9,6 +9,22 @@ using namespace std;
 
 namespace Manta {
 
+struct FluidData
+{
+	/* data */
+	FluidSolver* parent;
+	FlagGrid* mFlags;
+	MACGrid* mVel;
+	Grid<Real>* mDensity;
+	Grid<Real>* mReact;
+	Grid<Real>* mFuel;
+	Grid<Real>* mHeat;
+	Grid<Real>* mFlame;
+	Grid<Real>* mPressure;
+	FluidData() {};
+	FluidData(FluidSolver* parent);
+};
+
 PYTHON(name=MultiGridSolver)
 class MultiGridSolver : public FluidSolver {
 public:
@@ -25,6 +41,9 @@ public:
 	PYTHON() void advectFineGrid();
 	PYTHON() void calculateFineGrid();
 	PYTHON() void solveFineGrid();
+
+	// gather global data from fine grid for rendering
+	PYTHON() void gatherGlobalData();
 
 	PYTHON() PbClass* getFlagsObj();
 	PYTHON() PbClass* getVelObj();
@@ -44,6 +63,15 @@ public:
 	Grid<Real>* getFlameGrid() {return mFlame;}
 	Grid<Real>* getPressureGrid() {return mPressure;}
 
+	FlagGrid* getCoarseFlagsGrid() {return mCoarseFlags;}
+	MACGrid* getCoarseVelGrid() {return mCoarseVel;}
+	Grid<Real>* getCoarseDensityGrid() {return mCoarseDensity;}
+	Grid<Real>* getCoarseReactGrid() {return mCoarseReact;}
+	Grid<Real>* getCoarseFuelGrid() {return mCoarseFuel;}
+	Grid<Real>* getCoarseHeatGrid() {return mCoarseHeat;}
+	Grid<Real>* getCoarseFlameGrid() {return mCoarseFlame;}
+	Grid<Real>* getCoarsePressureGrid() {return mCoarsePressure;}
+
 protected:
 	FluidSolver* mGlobalSolver;
 	FluidSolver* mCoarseSolver;
@@ -52,6 +80,10 @@ protected:
 	Vec3i mGlobalSize;
 	Vec3i mCoarseSize;
 	Vec3i mFineSize;
+
+	FluidData mGlobalData;
+	FluidData mCoarseData;
+	vector<FluidData> mFineDataList;
 
 	FlagGrid* mFlags;
 	MACGrid* mVel;
