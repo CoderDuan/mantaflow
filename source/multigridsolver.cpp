@@ -6,6 +6,27 @@
 using namespace std;
 namespace Manta {
 
+FluidData::FluidData(FluidSolver* p) {
+	parent = p;
+	PbType pt;
+	pt.S = "FlagGrid";
+	mFlags = (FlagGrid*)p->create(pt, PbTypeVec(), "");
+	pt.S = "MACGrid";
+	mVel = (MACGrid*)p->create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mDensity = (Grid<Real>*)p->create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mReact = (Grid<Real>*)p->create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mFuel = (Grid<Real>*)p->create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mHeat = (Grid<Real>*)p->create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mFlame = (Grid<Real>*)p->create(pt, PbTypeVec(), "");
+	pt.S = "RealGrid";
+	mPressure = (Grid<Real>*)p->create(pt, PbTypeVec(), "");
+}
+
 MultiGridSolver::MultiGridSolver(Vec3i cgs, Vec3i fgs, int dim)
 	: FluidSolver(Vec3i(cgs.x*fgs.x, cgs.y*fgs.y, cgs.z*fgs.z), dim, -1) {
 	mGlobalSize = Vec3i(cgs.x*fgs.x, cgs.y*fgs.y, cgs.z*fgs.z);
@@ -23,64 +44,20 @@ void MultiGridSolver::setMultiGridSolver(FluidSolver* cs, FluidSolver* fs) {
 void MultiGridSolver::initMultiGrid(int dim) {
 
 	PbType pt;
-	pt.S = "FlagGrid";
-	mFlags = (FlagGrid*)create(pt, PbTypeVec(), "");
-	pt.S = "MACGrid";
-	mVel = (MACGrid*)create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mDensity = (Grid<Real>*)create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mReact = (Grid<Real>*)create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mFuel = (Grid<Real>*)create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mHeat = (Grid<Real>*)create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mFlame = (Grid<Real>*)create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mPressure = (Grid<Real>*)create(pt, PbTypeVec(), "");
+	mGlobalData = FluidData(this);
 
 	if (mCoarseSolver == NULL)
 		return;
+	mCoarseData = FluidData(mCoarseSolver);
 
-	// coarse grids:
-	pt.S = "FlagGrid";
-	mCoarseFlags = (FlagGrid*)mCoarseSolver->create(pt, PbTypeVec(), "mCoarseFlags");
-	pt.S = "MACGrid";
-	mCoarseVel = (MACGrid*)mCoarseSolver->create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mCoarseDensity = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mCoarseReact = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mCoarseFuel = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mCoarseHeat = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mCoarseFlame = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
-	pt.S = "RealGrid";
-	mCoarsePressure = (Grid<Real>*)mCoarseSolver->create(pt, PbTypeVec(), "");
+	if (mFineSolver == NULL)
+		return;
 
 	// fine grids:
 	for (int i = 0; i < mCoarseSize.x; i++) {
 		for (int j = 0; j < mCoarseSize.y; j++) {
 			for (int k = 0; k < mCoarseSize.z; k++) {
-				pt.S = "FlagGrid";
-				mFineFlags.push_back((FlagGrid*)mFineSolver->create(pt, PbTypeVec(), ""));
-				pt.S = "MACGrid";
-				mFineVel.push_back((MACGrid*)mFineSolver->create(pt, PbTypeVec(), ""));
-				pt.S = "RealGrid";
-				mFineDensity.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-				pt.S = "RealGrid";
-				mFineReact.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-				pt.S = "RealGrid";
-				mFineFuel.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-				pt.S = "RealGrid";
-				mFineHeat.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-				pt.S = "RealGrid";
-				mFineFlame.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
-				pt.S = "RealGrid";
-				mFinePressure.push_back((Grid<Real>*)mFineSolver->create(pt, PbTypeVec(), ""));
+				mFineDataList.push_back(FluidData(mFineSolver));
 			}
 		}
 	}
@@ -142,6 +119,16 @@ void MultiGridSolver::calculateFineGrid() {
 
 void MultiGridSolver::solveFineGrid() {
 
+}
+
+void MultiGridSolver::gatherGlobalData() {
+	for (int idx = 0; idx < mCoarseSize.x; idx++) {
+		for (int idy = 0; idy < mCoarseSize.y; idy++) {
+			for (int idz = 0; idz < mCoarseSize.z; idz++) {
+
+			}
+		}
+	}
 }
 
 }

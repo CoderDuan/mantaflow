@@ -391,13 +391,28 @@ PYTHON() void advectSemiLagrange (FlagGrid* flags, MACGrid* vel, GridBase* grid,
 PYTHON() void advectCoarseGridSL (MultiGridSolver* mgs, int order = 1,
 								Real strength = 1.0, int orderSpace = 1, bool openBounds = false,
 								int boundaryWidth = 1) {
-	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getDensityGrid(), 2);
-	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getHeatGrid(), 2);
-	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getFuelGrid(), 2);
-	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getReactGrid(), 2);
-	advectSemiLagrange(mgs->getFlagsGrid(), mgs->getVelGrid(), mgs->getVelGrid(), 2);
+	FlagGrid* flags = mgs->getCoarseFlagsGrid();
+	MACGrid* vel = mgs->getCoarseVelGrid();
+	advectSemiLagrange(flags, vel, mgs->getCoarseDensityGrid(), 2);
+	advectSemiLagrange(flags, vel, mgs->getCoarseHeatGrid(), 2);
+	advectSemiLagrange(flags, vel, mgs->getCoarseFuelGrid(), 2);
+	advectSemiLagrange(flags, vel, mgs->getCoarseReactGrid(), 2);
+	advectSemiLagrange(flags, vel, vel, 2);
 	return;
 }
+
+// PYTHON() void advectFineGridSL (MultiGridSolver* mgs, int order = 1,
+// 								Real strength = 1.0, int orderSpace = 1, bool openBounds = false,
+// 								int boundaryWidth = 1) {
+// 	FlagGrid* flags = mgs->getFineFlagsGrid();
+// 	MACGrid* vel = mgs->getFineVelGrid();
+// 	advectSemiLagrange(flags, vel, mgs->getFineDensityGrid(), 2);
+// 	advectSemiLagrange(flags, vel, mgs->getFineHeatGrid(), 2);
+// 	advectSemiLagrange(flags, vel, mgs->getFineFuelGrid(), 2);
+// 	advectSemiLagrange(flags, vel, mgs->getFineReactGrid(), 2);
+// 	advectSemiLagrange(flags, vel, vel, 2);
+// 	return;
+// }
 
 } // end namespace DDF 
 
