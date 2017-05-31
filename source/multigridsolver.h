@@ -4,7 +4,6 @@
 #include "grid.h"
 #include "fluidsolver.h"
 
-
 using namespace std;
 
 namespace Manta {
@@ -54,23 +53,23 @@ public:
 	PYTHON() PbClass* getFlameObj();
 	PYTHON() PbClass* getPressureObj();
 
-	FlagGrid* getFlagsGrid() {return mFlags;}
-	MACGrid* getVelGrid() {return mVel;}
-	Grid<Real>* getDensityGrid() {return mDensity;}
-	Grid<Real>* getReactGrid() {return mReact;}
-	Grid<Real>* getFuelGrid() {return mFuel;}
-	Grid<Real>* getHeatGrid() {return mHeat;}
-	Grid<Real>* getFlameGrid() {return mFlame;}
-	Grid<Real>* getPressureGrid() {return mPressure;}
+	FlagGrid* getFlagsGrid() {return mGlobalData.mFlags;}
+	MACGrid* getVelGrid() {return mGlobalData.mVel;}
+	Grid<Real>* getDensityGrid() {return mGlobalData.mDensity;}
+	Grid<Real>* getReactGrid() {return mGlobalData.mReact;}
+	Grid<Real>* getFuelGrid() {return mGlobalData.mFuel;}
+	Grid<Real>* getHeatGrid() {return mGlobalData.mHeat;}
+	Grid<Real>* getFlameGrid() {return mGlobalData.mFlame;}
+	Grid<Real>* getPressureGrid() {return mGlobalData.mPressure;}
 
-	FlagGrid* getCoarseFlagsGrid() {return mCoarseFlags;}
-	MACGrid* getCoarseVelGrid() {return mCoarseVel;}
-	Grid<Real>* getCoarseDensityGrid() {return mCoarseDensity;}
-	Grid<Real>* getCoarseReactGrid() {return mCoarseReact;}
-	Grid<Real>* getCoarseFuelGrid() {return mCoarseFuel;}
-	Grid<Real>* getCoarseHeatGrid() {return mCoarseHeat;}
-	Grid<Real>* getCoarseFlameGrid() {return mCoarseFlame;}
-	Grid<Real>* getCoarsePressureGrid() {return mCoarsePressure;}
+	FlagGrid* getCoarseFlagsGrid() {return mCoarseData.mFlags;}
+	MACGrid* getCoarseVelGrid() {return mCoarseData.mVel;}
+	Grid<Real>* getCoarseDensityGrid() {return mCoarseData.mDensity;}
+	Grid<Real>* getCoarseReactGrid() {return mCoarseData.mReact;}
+	Grid<Real>* getCoarseFuelGrid() {return mCoarseData.mFuel;}
+	Grid<Real>* getCoarseHeatGrid() {return mCoarseData.mHeat;}
+	Grid<Real>* getCoarseFlameGrid() {return mCoarseData.mFlame;}
+	Grid<Real>* getCoarsePressureGrid() {return mCoarseData.mPressure;}
 
 protected:
 	FluidSolver* mGlobalSolver;
@@ -93,25 +92,6 @@ protected:
 	Grid<Real>* mHeat;
 	Grid<Real>* mFlame;
 	Grid<Real>* mPressure;
-
-	FlagGrid* mCoarseFlags;
-	MACGrid* mCoarseVel;
-	Grid<Real>* mCoarseDensity;
-	Grid<Real>* mCoarseReact;
-	Grid<Real>* mCoarseFuel;
-	Grid<Real>* mCoarseHeat;
-	Grid<Real>* mCoarseFlame;
-	Grid<Real>* mCoarsePressure;
-
-	vector<FlagGrid*> mFineFlags;
-	vector<MACGrid*> mFineVel;
-	vector<Grid<Real>*> mFineDensity;
-	vector<Grid<Real>*> mFineReact;
-	vector<Grid<Real>*> mFineFuel;
-	vector<Grid<Real>*> mFineHeat;
-	vector<Grid<Real>*> mFineFlame;
-	vector<Grid<Real>*> mFinePressure;
-
 };
 
 }

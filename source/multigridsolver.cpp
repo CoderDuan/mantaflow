@@ -42,7 +42,6 @@ void MultiGridSolver::setMultiGridSolver(FluidSolver* cs, FluidSolver* fs) {
 }
 
 void MultiGridSolver::initMultiGrid(int dim) {
-
 	PbType pt;
 	mGlobalData = FluidData(this);
 
@@ -61,39 +60,38 @@ void MultiGridSolver::initMultiGrid(int dim) {
 			}
 		}
 	}
-
 }
 
 PbClass* MultiGridSolver::getFlagsObj() {
-	return (PbClass*)mFlags;
+	return (PbClass*)mGlobalData.mFlags;
 }
 
 PbClass* MultiGridSolver::getVelObj() {
-	return (PbClass*)mVel;
+	return (PbClass*)mGlobalData.mVel;
 }
 
 PbClass* MultiGridSolver::getDensityObj() {
-	return (PbClass*)mDensity;
+	return (PbClass*)mGlobalData.mDensity;
 }
 
 PbClass* MultiGridSolver::getReactObj() {
-	return (PbClass*)mReact;
+	return (PbClass*)mGlobalData.mReact;
 }
 
 PbClass* MultiGridSolver::getFuelObj() {
-	return (PbClass*)mFuel;
+	return (PbClass*)mGlobalData.mFuel;
 }
 
 PbClass* MultiGridSolver::getHeatObj() {
-	return (PbClass*)mHeat;
+	return (PbClass*)mGlobalData.mHeat;
 }
 
 PbClass* MultiGridSolver::getFlameObj() {
-	return (PbClass*)mFlame;
+	return (PbClass*)mGlobalData.mFlame;
 }
 
 PbClass* MultiGridSolver::getPressureObj() {
-	return (PbClass*)mPressure;
+	return (PbClass*)mGlobalData.mPressure;
 }
 
 
