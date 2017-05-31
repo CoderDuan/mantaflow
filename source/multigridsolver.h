@@ -29,15 +29,20 @@ class MultiGridSolver : public FluidSolver {
 public:
 	PYTHON() MultiGridSolver(Vec3i coarseGridSize, Vec3i fineGridSize, int dim=3);
 
-	PYTHON() void initMultiGrid(int dim);
+	// init all data grids
+	PYTHON() void initMultiGrid(int dim, int bWidth=1);
 
 	PYTHON() void setMultiGridSolver(FluidSolver* coarseGridSolver, FluidSolver* fineGridSolver);
 
-	PYTHON() void advectCoarseGrid();
+	Vec3i getCoarseSize() {return mCoarseSize;}
+	Vec3i getFineSize() {return mFineSize;}
+	inline int fineGridIndex(int i, int j, int k) {
+		return (i*mCoarseSize.y*mCoarseSize.z + j*mCoarseSize.z + k);
+	}
+
 	PYTHON() void calculateCoarseGrid();
 	PYTHON() void solveCoarseGrid();
 
-	PYTHON() void advectFineGrid();
 	PYTHON() void calculateFineGrid();
 	PYTHON() void solveFineGrid();
 
@@ -53,6 +58,9 @@ public:
 	PYTHON() PbClass* getFlameObj();
 	PYTHON() PbClass* getPressureObj();
 
+	int boundaryWidth;
+
+	// Global grids
 	FlagGrid* getFlagsGrid() {return mGlobalData.mFlags;}
 	MACGrid* getVelGrid() {return mGlobalData.mVel;}
 	Grid<Real>* getDensityGrid() {return mGlobalData.mDensity;}
@@ -62,6 +70,7 @@ public:
 	Grid<Real>* getFlameGrid() {return mGlobalData.mFlame;}
 	Grid<Real>* getPressureGrid() {return mGlobalData.mPressure;}
 
+	// Coarse grids
 	FlagGrid* getCoarseFlagsGrid() {return mCoarseData.mFlags;}
 	MACGrid* getCoarseVelGrid() {return mCoarseData.mVel;}
 	Grid<Real>* getCoarseDensityGrid() {return mCoarseData.mDensity;}
@@ -70,6 +79,16 @@ public:
 	Grid<Real>* getCoarseHeatGrid() {return mCoarseData.mHeat;}
 	Grid<Real>* getCoarseFlameGrid() {return mCoarseData.mFlame;}
 	Grid<Real>* getCoarsePressureGrid() {return mCoarseData.mPressure;}
+
+	// Fine grids
+	FlagGrid* getFineFlagsGrid(int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mFlags;}
+	MACGrid* getFineVelGrid(int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mVel;}
+	Grid<Real>* getFineDensityGrid(int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mDensity;}
+	Grid<Real>* getFineReactGrid(int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mReact;}
+	Grid<Real>* getFineFuelGrid(int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mFuel;}
+	Grid<Real>* getFineHeatGrid(int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mHeat;}
+	Grid<Real>* getFineFlameGrid(int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mFlame;}
+	Grid<Real>* getFinePressureGrid(int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mPressure;}
 
 protected:
 	FluidSolver* mGlobalSolver;

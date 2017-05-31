@@ -14,6 +14,7 @@
 #include "kernel.h"
 #include "conjugategrad.h"
 #include "multigrid.h"
+#include "multigridsolver.h"
 
 using namespace std;
 namespace Manta {
@@ -380,6 +381,25 @@ PYTHON() void solvePressure(MACGrid& vel, Grid<Real>& pressure, FlagGrid& flags,
 	// optionally , return RHS
 	if(retRhs) {
 		retRhs->copyFrom( rhs );
+	}
+}
+
+PYTHON() void solvePressureCoarseGrid(MultiGridSolver* mgs) {
+	solvePressure(*(mgs->getCoarseVelGrid()),
+		*(mgs->getCoarsePressureGrid()),
+		*(mgs->getCoarseFlagsGrid()));
+}
+
+PYTHON() void solvePressureFineGrid(MultiGridSolver* mgs) {
+	Vec3i size = mgs->getCoarseSize();
+	for (int i = 0; i < size.x; i++) {
+		for (int j = 0; j < size.y; j++) {
+			for (int k = 0; k < size.z; k++) {
+				solvePressure(*(mgs->getFineVelGrid(i,j,k)),
+					*(mgs->getFinePressureGrid(i,j,k)),
+					*(mgs->getFineFlagsGrid(i,j,k)));
+			}
+		}
 	}
 }
 

@@ -36,7 +36,7 @@ T* FluidSolver::GridStorage<T>::get(Vec3i size) {
 		debMsg("FluidSolver::GridStorage::get Allocating new "<<size.x<<","<<size.y<<","<<size.z<<" ",3); 
 		grids.push_back( new T[(long long)(size.x) * size.y * size.z] );
 	}
-	if (used > 900)
+	if (used > 8192)
 		errMsg("too many temp grids used -- are they released properly ?");
 	return grids[used++];
 }

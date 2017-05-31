@@ -15,6 +15,7 @@
 #include "grid.h"
 #include "commonkernels.h"
 #include "particle.h"
+#include "multigridsolver.h"
 
 using namespace std;
 
@@ -71,6 +72,46 @@ PYTHON() void addBuoyancy(FlagGrid& flags, Grid<Real>& density, MACGrid& vel, Ve
 	KnAddBuoyancy(flags,density, vel, f);
 }
 
+PYTHON() void addBuoyancyCoarseDensityGrid(MultiGridSolver* mgs, Vec3 gravity) {
+	addBuoyancy(*(mgs->getCoarseFlagsGrid()),
+		*(mgs->getCoarseDensityGrid()),
+		*(mgs->getCoarseVelGrid()), gravity);
+}
+
+PYTHON() void addBuoyancyCoarseHeatGrid(MultiGridSolver* mgs, Vec3 gravity) {
+	addBuoyancy(*(mgs->getCoarseFlagsGrid()),
+		*(mgs->getCoarseHeatGrid()),
+		*(mgs->getCoarseVelGrid()), gravity);
+}
+
+PYTHON() void addBuoyancyFineDensityGrid(MultiGridSolver* mgs, Vec3 gravity) {
+	Vec3i size = mgs->getCoarseSize();
+	for (int i = 0; i < size.x; i++) {
+		for (int j = 0; j < size.y; j++) {
+			for (int k = 0; k < size.z; k++) {
+				addBuoyancy(*(mgs->getFineFlagsGrid(i,j,k)),
+					*(mgs->getFineDensityGrid(i,j,k)),
+					*(mgs->getFineVelGrid(i,j,k)),
+					gravity);
+			}
+		}
+	}
+}
+
+PYTHON() void addBuoyancyFineHeatGrid(MultiGridSolver* mgs, Vec3 gravity) {
+	Vec3i size = mgs->getCoarseSize();
+	for (int i = 0; i < size.x; i++) {
+		for (int j = 0; j < size.y; j++) {
+			for (int k = 0; k < size.z; k++) {
+				addBuoyancy(*(mgs->getFineFlagsGrid(i,j,k)),
+					*(mgs->getFineHeatGrid(i,j,k)),
+					*(mgs->getFineVelGrid(i,j,k)),
+					gravity);
+			}
+		}
+	}
+}
+
 // inflow / outflow boundaries
 
 //! helper to parse openbounds string [xXyYzZ] , convert to vec3 
@@ -114,6 +155,27 @@ PYTHON() void setOpenBound(FlagGrid& flags, int bWidth, string openBound = "", i
 	}
 }
 
+ PYTHON() void setOpenBoundMultiGrid(MultiGridSolver* mgs) {
+	// Global flag grid:
+	setOpenBound(*(mgs->getFlagsGrid()), mgs->boundaryWidth, "xXyYzZ",
+		FlagGrid::TypeOutflow | FlagGrid::TypeEmpty);
+
+	// Coarse flag grid:
+	setOpenBound(*(mgs->getCoarseFlagsGrid()), mgs->boundaryWidth, "xXyYzZ",
+		FlagGrid::TypeOutflow | FlagGrid::TypeEmpty);
+
+	// Fine flag grids:
+	Vec3i size = mgs->getCoarseSize();
+	for (int i = 0; i < size.x; i++) {
+		for (int j = 0; j < size.y; j++) {
+			for (int k = 0; k < size.z; k++) {
+				setOpenBound(*(mgs->getFineFlagsGrid(i,j,k)), mgs->boundaryWidth, "xXyYzZ",
+					FlagGrid::TypeOutflow | FlagGrid::TypeEmpty);
+			}
+		}
+	}
+}
+
 //! delete fluid and ensure empty flag in outflow cells, delete particles and density and set phi to 0.5
 PYTHON() void resetOutflow(FlagGrid& flags, Grid<Real>* phi = 0, BasicParticleSystem* parts = 0, Grid<Real>* real = 0, Grid<int>* index = 0, ParticleIndexSystem* indexSys = 0){
 	// check if phi and parts -> pindex and gpi already created -> access particles from cell index, avoid extra looping over particles
@@ -142,6 +204,21 @@ PYTHON() void resetOutflow(FlagGrid& flags, Grid<Real>* phi = 0, BasicParticleSy
 		}
 	}
 	if (parts) parts->doCompress();
+}
+
+PYTHON() void resetOutflowCoarseGrid(MultiGridSolver* mgs) {
+	resetOutflow(*(mgs->getCoarseFlagsGrid()), 0, 0, mgs->getCoarseDensityGrid());
+}
+
+PYTHON() void resetOutflowFineGrid(MultiGridSolver* mgs) {
+	Vec3i size = mgs->getCoarseSize();
+	for (int i = 0; i < size.x; i++) {
+		for (int j = 0; j < size.y; j++) {
+			for (int k = 0; k < size.z; k++) {
+				resetOutflow(*(mgs->getFineFlagsGrid(i,j,k)), 0, 0, mgs->getFineDensityGrid(i,j,k));
+			}
+		}
+	}
 }
 
 //! enforce a constant inflow/outflow at the grid boundaries
