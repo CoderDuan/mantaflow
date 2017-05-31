@@ -14,6 +14,7 @@
 #ifndef _FLUIDSOLVER_H
 #define _FLUIDSOLVER_H
 
+#include "grid.h"
 #include "manta.h"
 #include "vectorbase.h"
 #include "vector4d.h"
@@ -21,7 +22,7 @@
 #include <map>
 
 namespace Manta { 
-	
+
 //! Encodes grid size, timstep etc.
 PYTHON(name=Solver) 
 class FluidSolver : public PbClass {
@@ -88,18 +89,6 @@ protected:
 	GridStorage<Real> mGridsReal;
 	GridStorage<Vec3> mGridsVec;
 
-public:
-	FluidSolver* coarseGridSolver;
-	std::vector<FluidSolver*> fineGridSolvers;
-	// void initMultiGrid(Vec3i coarseGridSize, Vec3i fineGridSize);
-	// PYTHON() void caculateFineGrid();
-	// PYTHON() void caculateCoarseGrid();
-	// PYTHON() void caculateGlobalGrid();
-
-protected:
-	Vec3i mCoarseGridSize;
-	Vec3i mFineGridSize;
-
 
 	//! 4d data section, only required for simulations working with space-time data 
 
@@ -117,7 +106,7 @@ protected:
 	//! 4d size. Note - 4d is not treated like going from 2d to 3d! 4D grids are a separate data type. Normally all
 	//! grids are forced to have the same size. In contrast, a solver can create and work with 3D as 
 	//! well as 4D grids, when fourth-dim is >0.
-	int       mFourthDim;  
+	int       mFourthDim;
 
 	//! 4d grid storage
 	GridStorage<Vec4> mGridsVec4; 
