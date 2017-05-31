@@ -41,13 +41,16 @@ void MultiGridSolver::setMultiGridSolver(FluidSolver* cs, FluidSolver* fs) {
 	mFineSolver = fs;
 }
 
-void MultiGridSolver::initMultiGrid(int dim) {
+void MultiGridSolver::initMultiGrid(int dim, int bWidth) {
 	PbType pt;
 	mGlobalData = FluidData(this);
+	boundaryWidth = bWidth;
 
 	if (mCoarseSolver == NULL)
 		return;
 	mCoarseData = FluidData(mCoarseSolver);
+	mCoarseData.mFlags->initDomain();
+	mCoarseData.mFlags->fillGrid();
 
 	if (mFineSolver == NULL)
 		return;
@@ -56,10 +59,16 @@ void MultiGridSolver::initMultiGrid(int dim) {
 	for (int i = 0; i < mCoarseSize.x; i++) {
 		for (int j = 0; j < mCoarseSize.y; j++) {
 			for (int k = 0; k < mCoarseSize.z; k++) {
-				mFineDataList.push_back(FluidData(mFineSolver));
+				FluidData mFineData = FluidData(mFineSolver);
+				mFineData.mFlags->initDomain();
+
+				mFineData.mFlags->fillGrid();
+				mFineDataList.push_back(mFineData);
 			}
 		}
 	}
+
+	printf("initMultiGrid() finished.\n");
 }
 
 PbClass* MultiGridSolver::getFlagsObj() {
@@ -95,19 +104,11 @@ PbClass* MultiGridSolver::getPressureObj() {
 }
 
 
-void MultiGridSolver::advectCoarseGrid() {
-
-}
-
 void MultiGridSolver::calculateCoarseGrid() {
 
 }
 
 void MultiGridSolver::solveCoarseGrid() {
-
-}
-
-void MultiGridSolver::advectFineGrid() {
 
 }
 

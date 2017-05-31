@@ -439,18 +439,24 @@ PYTHON() void advectCoarseGridSL (MultiGridSolver* mgs, int order = 1,
 	return;
 }
 
-// PYTHON() void advectFineGridSL (MultiGridSolver* mgs, int order = 1,
-// 								Real strength = 1.0, int orderSpace = 1, bool openBounds = false,
-// 								int boundaryWidth = 1) {
-// 	FlagGrid* flags = mgs->getFineFlagsGrid();
-// 	MACGrid* vel = mgs->getFineVelGrid();
-// 	advectSemiLagrange(flags, vel, mgs->getFineDensityGrid(), 2);
-// 	advectSemiLagrange(flags, vel, mgs->getFineHeatGrid(), 2);
-// 	advectSemiLagrange(flags, vel, mgs->getFineFuelGrid(), 2);
-// 	advectSemiLagrange(flags, vel, mgs->getFineReactGrid(), 2);
-// 	advectSemiLagrange(flags, vel, vel, 2);
-// 	return;
-// }
+PYTHON() void advectFineGridSL (MultiGridSolver* mgs, int order = 1,
+								Real strength = 1.0, int orderSpace = 1, bool openBounds = false,
+								int boundaryWidth = 1) {
+	Vec3i fineSize = mgs->getFineSize();
+
+	for (int i = 0; i < fineSize.x; i++) {
+		for (int j = 0; j < fineSize.y; j++) {
+			for (int k = 0; k < fineSize.z; k++) {
+				FlagGrid* flags = mgs->getFineFlagsGrid(i,j,k);
+				MACGrid* vel = mgs->getFineVelGrid(i,j,k);
+				advectSemiLagrange(flags, vel, mgs->getFineDensityGrid(i,j,k), 2);
+				advectSemiLagrange(flags, vel, mgs->getFineHeatGrid(i,j,k), 2);
+				advectSemiLagrange(flags, vel, mgs->getFineFuelGrid(i,j,k), 2);
+				advectSemiLagrange(flags, vel, mgs->getFineReactGrid(i,j,k), 2);
+			}
+		}
+	}
+}
 
 } // end namespace DDF 
 

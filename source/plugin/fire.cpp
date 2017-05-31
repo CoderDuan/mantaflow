@@ -14,6 +14,7 @@
 #include "general.h"
 #include "grid.h"
 #include "vectorbase.h"
+#include "multigridsolver.h"
 
 using namespace std;
 
@@ -74,6 +75,35 @@ PYTHON() void processBurn(Grid<Real>& fuel, Grid<Real>& density, Grid<Real>& rea
 				  flameSmoke, ignitionTemp, maxTemp, dt, flameSmokeColor);
 }
 
+PYTHON() void processBurnCoarseGrid(MultiGridSolver* mgs)
+{
+	Grid<Real>* fuel = mgs->getCoarseFuelGrid();
+	Grid<Real>* density = mgs->getCoarseDensityGrid();
+	Grid<Real>* react = mgs->getCoarseReactGrid();
+	Grid<Real>* heat = mgs->getCoarseHeatGrid();
+
+	KnProcessBurn(*fuel, *density, *react, NULL, NULL, NULL, heat,
+		0.75f, 1.0f, 1.25f, 1.75f, 0.1f, Vec3(0.7f, 0.7f, 0.7f));
+
+	return;
+}
+
+PYTHON() void processBurnFineGrid(MultiGridSolver* mgs)
+{
+	Vec3i size = mgs->getCoarseSize();
+	for (int i = 0; i < size.x; i++) {
+		for (int j = 0; j < size.y; j++) {
+			for (int k = 0; k < size.z; k++) {
+				Grid<Real>* fuel = mgs->getFineFuelGrid(i,j,k);
+				Grid<Real>* density = mgs->getFineDensityGrid(i,j,k);
+				Grid<Real>* react = mgs->getFineReactGrid(i,j,k);
+				Grid<Real>* heat = mgs->getFineHeatGrid(i,j,k);
+				KnProcessBurn(*fuel, *density, *react, NULL, NULL, NULL, heat,
+					0.75f, 1.0f, 1.25f, 1.75f, 0.1f, Vec3(0.7f, 0.7f, 0.7f));			
+			}
+		}
+	}
+}
 
 KERNEL (bnd=1)
 void KnUpdateFlame(Grid<Real>& react, Grid<Real>& flame)
@@ -87,6 +117,22 @@ void KnUpdateFlame(Grid<Real>& react, Grid<Real>& flame)
 PYTHON() void updateFlame(Grid<Real>& react, Grid<Real>& flame)
 {
 	KnUpdateFlame(react, flame);
+}
+
+PYTHON() void updateFlameCoarseGrid(MultiGridSolver* mgs) {
+	KnUpdateFlame(*(mgs->getCoarseReactGrid()), *(mgs->getCoarseFlameGrid()));
+}
+
+PYTHON() void updateFlameFineGrid(MultiGridSolver* mgs) {
+	Vec3i size = mgs->getCoarseSize();
+	for (int i = 0; i < size.x; i++) {
+		for (int j = 0; j < size.y; j++) {
+			for (int k = 0; k < size.z; k++) {
+				KnUpdateFlame(*(mgs->getFineReactGrid(i,j,k)),
+					*(mgs->getFineFlameGrid(i,j,k)));	
+			}
+		}
+	}
 }
 
 } // namespace
