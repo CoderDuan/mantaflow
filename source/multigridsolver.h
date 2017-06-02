@@ -22,6 +22,7 @@ struct FluidData
 	Grid<Real>* mPressure;
 	FluidData() {};
 	FluidData(FluidSolver* parent);
+	// void copyFrom(FluidData from, Vec3i offset, Vec3i size);
 };
 
 PYTHON(name=MultiGridSolver)
@@ -40,11 +41,11 @@ public:
 		return (i*mCoarseSize.y*mCoarseSize.z + j*mCoarseSize.z + k);
 	}
 
+	// calculate data of coarse grid using fine grids data
 	PYTHON() void calculateCoarseGrid();
-	PYTHON() void solveCoarseGrid();
 
+	// calculate data of fine grids using coarse grid data
 	PYTHON() void calculateFineGrid();
-	PYTHON() void solveFineGrid();
 
 	// gather global data from fine grid for rendering
 	PYTHON() void gatherGlobalData();
@@ -58,6 +59,7 @@ public:
 	PYTHON() PbClass* getFlameObj();
 	PYTHON() PbClass* getPressureObj();
 
+	// boundary width: 0 by default
 	int boundaryWidth;
 
 	// Global grids
@@ -103,14 +105,8 @@ protected:
 	FluidData mCoarseData;
 	vector<FluidData> mFineDataList;
 
-	FlagGrid* mFlags;
-	MACGrid* mVel;
-	Grid<Real>* mDensity;
-	Grid<Real>* mReact;
-	Grid<Real>* mFuel;
-	Grid<Real>* mHeat;
-	Grid<Real>* mFlame;
-	Grid<Real>* mPressure;
+	// calculate velocity of one coarse cell(i,j,k), using data of one fine grid(i,j,k)
+	Vec3 calculateCoarseCell(int i, int j, int k);
 };
 
 }

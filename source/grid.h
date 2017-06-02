@@ -172,6 +172,14 @@ public:
 	//! reduce small values to zero
 	PYTHON() void stomp(const T& threshold);
 	
+	PYTHON() T getAt(int i, int j, int k);
+	PYTHON() void setAt(int i, int j, int k, T val);
+	void copyFromFine(int i, int j, int k,
+		Grid<T> &fine, int sizeX, int sizeY, int sizeZ);
+	void copyFromFine(Vec3i pos, Grid<T> &fine, Vec3i size);
+	void copyToFine(int i, int j, int k,
+		Grid<T> &fine, int sizeX, int sizeY, int sizeZ);
+
 	// common compound operators
 	//! get absolute max value in grid 
 	PYTHON() Real getMaxAbs();
