@@ -228,6 +228,13 @@ template<class T> void Grid<T>::copyFromFine(int i, int j, int k,
 				mData[index(i+dx, j+dy, k+dz)] = fine.getAt(dx, dy, dz);
 }
 
+template<class T> void Grid<T>::copyFromFine(Vec3i pos, Grid<T> &fine, Vec3i size) {
+	for (int dx = 0; dx < size.x; dx++)
+		for (int dy = 0; dy < size.y; dy++)
+			for (int dz = 0; dz < size.z; dz++)
+				mData[index(pos.x+dx, pos.y+dy, pos.z+dz)] = fine.getAt(dx, dy, dz);
+}
+
 template<class T> void Grid<T>::copyToFine(int i, int j, int k,
 	Grid<T> &fine, int sizeX, int sizeY, int sizeZ) {
 	for (int dx = 0; dx < sizeX; dx++)

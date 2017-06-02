@@ -172,9 +172,10 @@ public:
 	
 	PYTHON() T getAt(int i, int j, int k);
 	PYTHON() void setAt(int i, int j, int k, T val);
-	PYTHON() void copyFromFine(int i, int j, int k,
+	void copyFromFine(int i, int j, int k,
 		Grid<T> &fine, int sizeX, int sizeY, int sizeZ);
-	PYTHON() void copyToFine(int i, int j, int k,
+	void copyFromFine(Vec3i pos, Grid<T> &fine, Vec3i size);
+	void copyToFine(int i, int j, int k,
 		Grid<T> &fine, int sizeX, int sizeY, int sizeZ);
 
 	// common compound operators

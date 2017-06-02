@@ -105,18 +105,32 @@ PbClass* MultiGridSolver::getPressureObj() {
 
 
 void MultiGridSolver::calculateCoarseGrid() {
-
+	// printf("calculateCoarseGrid()\n");
+	for (int i = 0; i < mCoarseSize.x; i++) {
+		for (int j = 0; j < mCoarseSize.y; j++) {
+			for (int k = 0; k < mCoarseSize.z; k++) {
+				mCoarseData.mVel->setAt(i,j,k,calculateCoarseCell(i,j,k));
+			}
+		}
+	}
 }
 
-void MultiGridSolver::solveCoarseGrid() {
+Vec3 MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
+	// printf("calculateCoarseCell()\n");
+	FluidData &cell = mFineDataList[fineGridIndex(i,j,k)];
+	Vec3 v(0,0,0);
+	for (int x = 0; x < mFineSize.x; x++) {
+		for (int y = 0; y < mFineSize.y; y++) {
+			for (int z = 0; z < mFineSize.z; z++) {
+				v += cell.mVel->getCentered(x,y,z);
+			}
+		}
+	}
 
+	return (v/(mFineSize.x*mFineSize.y*mFineSize.z));
 }
 
 void MultiGridSolver::calculateFineGrid() {
-
-}
-
-void MultiGridSolver::solveFineGrid() {
 
 }
 
@@ -124,7 +138,16 @@ void MultiGridSolver::gatherGlobalData() {
 	for (int idx = 0; idx < mCoarseSize.x; idx++) {
 		for (int idy = 0; idy < mCoarseSize.y; idy++) {
 			for (int idz = 0; idz < mCoarseSize.z; idz++) {
-
+				Vec3i pos = Vec3i(idx, idy, idz)*mFineSize;
+				FluidData &fdata = mFineDataList[fineGridIndex(idx,idy,idz)];
+				mGlobalData.mFlags->copyFromFine(pos, *(fdata.mFlags), mFineSize);
+				mGlobalData.mVel->copyFromFine(pos, *(fdata.mVel), mFineSize);
+				mGlobalData.mDensity->copyFromFine(pos, *(fdata.mDensity), mFineSize);
+				mGlobalData.mReact->copyFromFine(pos, *(fdata.mReact), mFineSize);
+				mGlobalData.mFuel->copyFromFine(pos, *(fdata.mFuel), mFineSize);
+				mGlobalData.mHeat->copyFromFine(pos, *(fdata.mHeat), mFineSize);
+				mGlobalData.mFlame->copyFromFine(pos, *(fdata.mFlame), mFineSize);
+				mGlobalData.mPressure->copyFromFine(pos, *(fdata.mPressure), mFineSize);
 			}
 		}
 	}

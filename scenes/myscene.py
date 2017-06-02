@@ -47,7 +47,7 @@ noise.valOffset = 0.75
 noise.timeAnim = 0.2
 
 # source: cube in center of domain (x, y), standing on bottom of the domain
-boxSize = vec3(resF, resF/8, resF)
+boxSize = vec3(resF, resF/4, resF)
 boxCenter = gsF*vec3(0.5, 0.5, 0.5)
 sourceBox = ms.create( Box, center=boxCenter, size=boxSize )
 
@@ -84,7 +84,10 @@ while ms.frame < frames:
 
 	updateFlameFineGrid(ms)
 
+	ms.calculateCoarseGrid()
+
+	ms.gatherGlobalData()
 	# updateFlame( react=react, flame=flame )
 
-	#timings.display()
+	timings.display()
 	ms.step()
