@@ -103,6 +103,9 @@ protected:
 
 	FluidData mGlobalData;
 	FluidData mCoarseData;
+
+	MACGrid* mCoarseOldVel;
+
 	vector<FluidData> mFineDataList;
 
 	// calculate velocity of one coarse cell(i,j,k), using data of one fine grid(i,j,k)

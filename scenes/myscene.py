@@ -3,11 +3,11 @@ from manta import *
 
 dim = 2
 # resolution
-resC = 8
-resF = 8
+resC = 1
+resF = 24
 # grid size
 gsC = vec3(resC, resC, resC)
-gsF = vec3(resF, resF, resF)
+gsF = vec3(resF+2, resF+2, resF+2)
 
 # buoyancy parameters
 smokeDensity = -0.001 # alpha
@@ -47,8 +47,8 @@ noise.valOffset = 0.75
 noise.timeAnim = 0.2
 
 # source: cube in center of domain (x, y), standing on bottom of the domain
-boxSize = vec3(resF, resF/4, resF)
-boxCenter = gsF*vec3(0.5, 0.5, 0.5)
+boxSize = vec3(resF, 0.05*resF, resF/8)
+boxCenter = gsF*vec3(0.5, 0.15, 0.5)
 sourceBox = ms.create( Box, center=boxCenter, size=boxSize )
 
 
@@ -66,9 +66,25 @@ while ms.frame < frames:
 	ms.adaptTimestep( maxvel )
 	mantaMsg('\nFrame %i, time-step size %f' % (ms.frame, ms.timestep))
 	
+	# coarse grids:
+	ms.calculateCoarseGrid()
+
+	processBurnCoarseGrid(ms)
+
+	advectCoarseGridSL(ms)
+
+	addBuoyancyCoarseDensityGrid(ms, gravity*smokeDensity)
+	addBuoyancyCoarseHeatGrid(ms, gravity*smokeTempDiff)
+
+	solvePressureCoarseGrid(ms)
+
+	updateFlameCoarseGrid(ms)
+
+	ms.calculateFineGrid()
+
 	# fine grids:
-	if ms.timeTotal<200:
-		densityInflowMultiGrid(ms, int(resC/2), int(resC/6), int(resC/2), noise, sourceBox)
+	if ms.timeTotal<250:
+		densityInflowMultiGrid(ms, 0, 0, int(resC/2), noise, sourceBox)
 
 	processBurnFineGrid(ms)
 
@@ -83,8 +99,6 @@ while ms.frame < frames:
 	solvePressureFineGrid(ms)
 
 	updateFlameFineGrid(ms)
-
-	ms.calculateCoarseGrid()
 
 	ms.gatherGlobalData()
 	# updateFlame( react=react, flame=flame )

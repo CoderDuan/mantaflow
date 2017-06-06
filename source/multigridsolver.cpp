@@ -29,7 +29,14 @@ FluidData::FluidData(FluidSolver* p) {
 
 MultiGridSolver::MultiGridSolver(Vec3i cgs, Vec3i fgs, int dim)
 	: FluidSolver(Vec3i(cgs.x*fgs.x, cgs.y*fgs.y, cgs.z*fgs.z), dim, -1) {
-	mGlobalSize = Vec3i(cgs.x*fgs.x, cgs.y*fgs.y, cgs.z*fgs.z);
+	if (fgs.z > 1) { // 3D
+		mGlobalSize = Vec3i(cgs.x*(fgs.x-2), cgs.y*(fgs.y-2), cgs.z*(fgs.z-2));
+		mGridSize = mGlobalSize;
+	} else {
+		mGlobalSize = Vec3i(cgs.x*(fgs.x-2), cgs.y*(fgs.y-2), cgs.z*fgs.z);
+		mGridSize = mGlobalSize;
+	}
+
 	mCoarseSize = cgs;
 	mFineSize = fgs;
 }
@@ -42,7 +49,6 @@ void MultiGridSolver::setMultiGridSolver(FluidSolver* cs, FluidSolver* fs) {
 }
 
 void MultiGridSolver::initMultiGrid(int dim, int bWidth) {
-	PbType pt;
 	mGlobalData = FluidData(this);
 	boundaryWidth = bWidth;
 
@@ -51,6 +57,9 @@ void MultiGridSolver::initMultiGrid(int dim, int bWidth) {
 	mCoarseData = FluidData(mCoarseSolver);
 	mCoarseData.mFlags->initDomain();
 	mCoarseData.mFlags->fillGrid();
+	PbType pt;
+	pt.S = "MACGrid";
+	mCoarseOldVel = (MACGrid*)create(pt, PbTypeVec(), "");
 
 	if (mFineSolver == NULL)
 		return;
@@ -113,21 +122,27 @@ void MultiGridSolver::calculateCoarseGrid() {
 			}
 		}
 	}
+	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
 }
 
 Vec3 MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
 	// printf("calculateCoarseCell()\n");
 	FluidData &cell = mFineDataList[fineGridIndex(i,j,k)];
 	Vec3 v(0,0,0);
-	for (int x = 0; x < mFineSize.x; x++) {
-		for (int y = 0; y < mFineSize.y; y++) {
-			for (int z = 0; z < mFineSize.z; z++) {
+	for (int x = 1; x < mFineSize.x-1; x++) {
+		for (int y = 1; y < mFineSize.y-1; y++) {
+			if (mFineSize.z == 1) { // 2D
+				v += cell.mVel->getCentered(x,y,0);
+				continue;
+			}
+			// 3D
+			for (int z = 1; z < mFineSize.z-1; z++) {
 				v += cell.mVel->getCentered(x,y,z);
 			}
 		}
 	}
 
-	return (v/(mFineSize.x*mFineSize.y*mFineSize.z));
+	return (v/((mFineSize.x-2)*(mFineSize.y-2)*(mFineSize.z-2)));
 }
 
 void MultiGridSolver::calculateFineGrid() {

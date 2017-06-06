@@ -234,17 +234,27 @@ template<class T> void Grid<T>::setAt(int i, int j, int k, T val) {
 
 template<class T> void Grid<T>::copyFromFine(int i, int j, int k,
 	Grid<T> &fine, int sizeX, int sizeY, int sizeZ) {
-	for (int dx = 0; dx < sizeX; dx++)
-		for (int dy = 0; dy < sizeY; dy++)
-			for (int dz = 0; dz < sizeZ; dz++)
-				mData[index(i+dx, j+dy, k+dz)] = fine.getAt(dx, dy, dz);
+	for (int dx = 0; dx < sizeX-2; dx++)
+		for (int dy = 0; dy < sizeY-2; dy++) {
+			if (sizeZ > 1) { // 3D
+				for (int dz = 0; dz < sizeZ-2; dz++)
+					mData[index(i+dx, j+dy, k+dz)] = fine.getAt(dx+1, dy+1, dz+1);
+			} else { //2D
+				mData[index(i+dx, j+dy, k)] = fine.getAt(dx+1, dy+1, 0);
+			}
+		}
 }
 
 template<class T> void Grid<T>::copyFromFine(Vec3i pos, Grid<T> &fine, Vec3i size) {
-	for (int dx = 0; dx < size.x; dx++)
-		for (int dy = 0; dy < size.y; dy++)
-			for (int dz = 0; dz < size.z; dz++)
-				mData[index(pos.x+dx, pos.y+dy, pos.z+dz)] = fine.getAt(dx, dy, dz);
+	for (int dx = 0; dx < size.x-2; dx++)
+		for (int dy = 0; dy < size.y-2; dy++) {
+			if (size.z > 1) { // 3D
+				for (int dz = 0; dz < size.z-2; dz++)
+					mData[index(pos.x+dx, pos.y+dy, pos.z+dz)] = fine.getAt(dx+1, dy+1, dz+1);
+			} else {
+				mData[index(pos.x+dx, pos.y+dy, pos.z)] = fine.getAt(dx+1, dy+1, 0);
+			}
+		}
 }
 
 template<class T> void Grid<T>::copyToFine(int i, int j, int k,
