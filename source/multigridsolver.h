@@ -97,9 +97,11 @@ protected:
 	FluidSolver* mCoarseSolver;
 	FluidSolver* mFineSolver;
 
+	bool is3D;
 	Vec3i mGlobalSize;
 	Vec3i mCoarseSize;
 	Vec3i mFineSize;
+	Vec3i mFineGridNum;
 
 	FluidData mGlobalData;
 	FluidData mCoarseData;

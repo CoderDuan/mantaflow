@@ -179,6 +179,8 @@ public:
 	void copyFromFine(Vec3i pos, Grid<T> &fine, Vec3i size);
 	void copyToFine(int i, int j, int k,
 		Grid<T> &fine, int sizeX, int sizeY, int sizeZ);
+	void copyFromGlobal(Grid<T> &global, int startX, int startY, int startZ,
+		int sizeX, int sizeY, int sizeZ);
 
 	// common compound operators
 	//! get absolute max value in grid 
