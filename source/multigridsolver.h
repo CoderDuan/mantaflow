@@ -37,6 +37,7 @@ public:
 
 	Vec3i getCoarseSize() {return mCoarseSize;}
 	Vec3i getFineSize() {return mFineSize;}
+	Vec3i getFineGridNum() {return mFineGridNum;}
 	inline int fineGridIndex(int i, int j, int k) {
 		return (i*mCoarseSize.y*mCoarseSize.z + j*mCoarseSize.z + k);
 	}
@@ -97,11 +98,11 @@ protected:
 	FluidSolver* mCoarseSolver;
 	FluidSolver* mFineSolver;
 
-	bool is3D;
 	Vec3i mGlobalSize;
 	Vec3i mCoarseSize;
 	Vec3i mFineSize;
 	Vec3i mFineGridNum;
+	Vec3i mFineSizeEffective;
 
 	FluidData mGlobalData;
 	FluidData mCoarseData;
