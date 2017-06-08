@@ -391,7 +391,7 @@ PYTHON() void solvePressureCoarseGrid(MultiGridSolver* mgs) {
 }
 
 PYTHON() void solvePressureFineGrid(MultiGridSolver* mgs) {
-	Vec3i size = mgs->getCoarseSize();
+	Vec3i size = mgs->getFineGridNum();
 	for (int i = 0; i < size.x; i++) {
 		for (int j = 0; j < size.y; j++) {
 			for (int k = 0; k < size.z; k++) {
