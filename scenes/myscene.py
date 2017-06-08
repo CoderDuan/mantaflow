@@ -101,15 +101,16 @@ while ms.frame < frames:
 	addBuoyancy(flags=flags, density=heat,    vel=vel, gravity=(gravity*smokeTempDiff))
 
 	# global copy to fine
-	ms.calculateFineGrid()
+	ms.mapDataToFineGrid()
 
 	# solve pressure fine
 	solvePressureFineGrid(ms)
 
 	# global copy to coarse
-	
+	ms.mapDataToCoarseGrid()
 
 	# solve pressure coarse
+	solvePressureCoarseGrid()
 
 	# copy to global
 

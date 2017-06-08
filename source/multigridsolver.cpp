@@ -130,58 +130,8 @@ PbClass* MultiGridSolver::getPressureObj() {
 	return (PbClass*)mGlobalData.mPressure;
 }
 
-
-void MultiGridSolver::calculateCoarseGrid() {
-	// printf("calculateCoarseGrid()\n");
-	// for (int i = 0; i < mCoarseSize.x; i++) {
-	// 	for (int j = 0; j < mCoarseSize.y; j++) {
-	// 		for (int k = 0; k < mCoarseSize.z; k++) {
-	// 			mCoarseData.mVel->setAt(i,j,k,calculateCoarseCell(i,j,k));
-	// 		}
-	// 	}
-	// }
-	// mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
-	for (int i = 0; i < mFineGridNum.x; i++) {
-		for (int j = 0; j < mFineGridNum.y; j++) {
-			for (int k = 0; k < mFineGridNum.z; k++) {
-				mCoarseData.mVel->setAt(i+1, j+1, k+1, calculateCoarseCell(i,j,k));
-			}
-		}
-	}
-	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
-}
-
-Vec3 MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
-	// printf("calculateCoarseCell()\n");
-	FluidData &cell = mFineDataList[fineGridIndex(i,j,k)];
-	Vec3 v(0,0,0);
-	int cnt = 0;
-	for (int x = 1; x < mFineSize.x-1; x++) {
-		for (int y = 1; y < mFineSize.y-1; y++) {
-			if (is3D()) { // 3D
-				for (int z = 1; z < mFineSize.z-1; z++) {
-					cnt++;
-					v += cell.mVel->getCentered(x,y,z);
-				}
-			} else { // 2D
-				cnt++;
-				v += cell.mVel->getCentered(x,y,0);
-			}
-		}
-	}
-
-	v = v/cnt;
-
-	v.x = v.x / (mFineSize.x-2);
-	v.y = v.y / (mFineSize.y-2);
-	if (mFineSize.z != 1)
-		v.z = v.z / (mFineSize.z-2);
-
-	return v;
-}
-
-void MultiGridSolver::calculateFineGrid() {
-	if (is3D()) {	
+void MultiGridSolver::mapDataToFineGrid() {
+	if (is3D()) {
 		for (int i = 0; i < mFineGridNum.x; i++) {
 			for (int j = 0; j < mFineGridNum.y; j++) {
 				for (int k = 0; k < mFineGridNum.z; k++) {
@@ -204,6 +154,57 @@ void MultiGridSolver::calculateFineGrid() {
 			}
 		}
 	}
+}
+
+void MultiGridSolver::mapDataToCoarseGrid() {
+	for (int i = 0; i < mFineGridNum.x; i++) {
+		for (int j = 0; j < mFineGridNum.y; j++) {
+			for (int k = 0; k < mFineGridNum.z; k++) {
+				mCoarseData.mVel->setAt(i+1, j+1, k+1, calculateCoarseCell(i,j,k));
+			}
+		}
+	}
+	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
+}
+
+Vec3 MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
+	// printf("calculateCoarseCell()\n");
+	FluidData &cell = mFineDataList[fineGridIndex(i,j,k)];
+	Vec3 v(0,0,0);
+	float pressure = 0;
+	int cnt = 0;
+	for (int x = 1; x < mFineSize.x-1; x++) {
+		for (int y = 1; y < mFineSize.y-1; y++) {
+			if (is3D()) { // 3D
+				for (int z = 1; z < mFineSize.z-1; z++) {
+					cnt++;
+					v += cell.mVel->getAt(x,y,z);
+					pressure += cell.mPressure->getAt(x,y,z);
+				}
+			} else { // 2D
+				cnt++;
+				v += cell.mVel->getAt(x,y,0);
+				pressure += cell.mPressure->getAt(x,y,0);
+			}
+		}
+	}
+
+	v = v/cnt;
+	v.x /= mFineSizeEffective.x;
+	v.y /= mFineSizeEffective.y;
+	v.z /= mFineSizeEffective.z;
+
+	pressure /= cnt;
+
+	return v;
+}
+
+void MultiGridSolver::calculateFineGrid() {
+	
+}
+
+void MultiGridSolver::calculateCoarseGrid() {
+	
 }
 
 void MultiGridSolver::gatherGlobalData() {
