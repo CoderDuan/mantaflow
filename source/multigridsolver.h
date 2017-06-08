@@ -43,9 +43,11 @@ public:
 	}
 
 	// calculate data of coarse grid using fine grids data
+	PYTHON() void mapDataToCoarseGrid();
 	PYTHON() void calculateCoarseGrid();
 
 	// calculate data of fine grids using coarse grid data
+	PYTHON() void mapDataToFineGrid();
 	PYTHON() void calculateFineGrid();
 
 	// gather global data from fine grid for rendering
