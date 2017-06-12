@@ -44,13 +44,12 @@ public:
 
 	// calculate data of coarse grid using fine grids data
 	PYTHON() void mapDataToCoarseGrid();
-	PYTHON() void calculateCoarseGrid();
 
 	// calculate data of fine grids using coarse grid data
 	PYTHON() void mapDataToFineGrid();
-	PYTHON() void calculateFineGrid();
 
 	// gather global data from fine grid for rendering
+	PYTHON() void mapCoarseDataToFineGrid();
 	PYTHON() void gatherGlobalData();
 
 	PYTHON() PbClass* getFlagsObj();
@@ -103,8 +102,8 @@ protected:
 	Vec3i mGlobalSize;
 	Vec3i mCoarseSize;
 	Vec3i mFineSize;
-	Vec3i mFineGridNum;
-	Vec3i mFineSizeEffective;
+	Vec3i mFineGridNum; // the number of fine grids, that is (mCoarseGrid - (2,2,2))
+	Vec3i mFineSizeEffective; // without boarders, that is (mFineSize - (2,2,2))
 
 	FluidData mGlobalData;
 	FluidData mCoarseData;
