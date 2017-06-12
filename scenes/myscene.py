@@ -113,6 +113,7 @@ while ms.frame < frames:
 	solvePressureCoarseGrid()
 
 	# copy to global
+	ms.mapCoarseDataToFineGrid()
 
 	# global update flame
 
