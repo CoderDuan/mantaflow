@@ -5,7 +5,7 @@ from manta import *
 
 # solver params
 dim = 2
-res = 24
+res = 36
 gs = vec3(res, res, res)
 if dim==2:
 	gs.z=1
@@ -63,7 +63,7 @@ if (GUI):
 	#gui.pause()
 
 # source: cube in center of domain (x, y), standing on bottom of the domain
-boxSize = vec3(res, 0.05*res, res/8)
+boxSize = gs*vec3(1/8, 0.05, 1/8)
 boxCenter = gs*vec3(0.5, 0.15, 0.5)
 sourceBox = s.create( Box, center=boxCenter, size=boxSize )
 
