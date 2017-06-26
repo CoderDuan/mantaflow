@@ -140,7 +140,6 @@ PYTHON() void setOpenBound(FlagGrid& flags, int bWidth, string openBound = "", i
 		bool upY = up.y && j >= flags.getSizeY() - bWidth - 1; 
 		bool innerI = i>bWidth && i<flags.getSizeX() - bWidth - 1; // a cell which does not belong to the lower or upper x bound
 		bool innerJ = j>bWidth && j<flags.getSizeY() - bWidth - 1; 
-
 		// when setting boundaries to open: don't set shared part of wall to empty if neighboring wall is not open
 		if ( (!flags.is3D()) && (loX||upX||loY||upY)){
 			if ((loX || upX || innerI) && (loY || upY || innerJ) && flags.isObstacle(i, j, k)) flags(i, j, k) = type;
@@ -165,11 +164,14 @@ PYTHON() void setOpenBound(FlagGrid& flags, int bWidth, string openBound = "", i
 		FlagGrid::TypeOutflow | FlagGrid::TypeEmpty);
 
 	// Fine flag grids:
-	Vec3i size = mgs->getCoarseSize();
+	Vec3i size = mgs->getFineGridNum();
+
 	for (int i = 0; i < size.x; i++) {
 		for (int j = 0; j < size.y; j++) {
 			for (int k = 0; k < size.z; k++) {
-				setOpenBound(*(mgs->getFineFlagsGrid(i,j,k)), mgs->boundaryWidth, "xXyYzZ",
+				FlagGrid &fgrid = *(mgs->getFineFlagsGrid(i,j,k));
+				//printf("%d, %d, %d\n", i,j,k);
+				setOpenBound(fgrid, 0, "xXyYzZ",
 					FlagGrid::TypeOutflow | FlagGrid::TypeEmpty);
 			}
 		}

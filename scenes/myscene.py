@@ -3,12 +3,12 @@ from manta import *
 
 dim = 2
 # resolution
-resC = 10
-resF = 24
+resC = 6
+resF = 6
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
-
+gsG = vec3(resC*resF+2, resC*resF+2, resC*resF+2)
 # buoyancy parameters
 smokeDensity = -0.001 # alpha
 smokeTempDiff = 0.1   # beta
@@ -16,8 +16,10 @@ bWidth = 0
 if dim==2:
 	gsC.z = 1
 	gsF.z = 1
+	gsG.z = 1
 
-ms = MultiGridSolver(name='MultiGridSolver', coarseGridSize=gsC, fineGridSize=gsF, dim=dim)
+ms = MultiGridSolver(name='MultiGridSolver',
+	coarseGridSize=gsC, fineGridSize=gsF, globalGridSize=gsG, dim=dim)
 csolver = Solver(name='CoarseSolver', gridSize=gsC, dim=dim)
 fsolver = Solver(name='FineSolver', gridSize=gsF, dim=dim)
 ms.setMultiGridSolver(csolver, fsolver);
@@ -47,19 +49,22 @@ noise.valOffset = 0.75
 noise.timeAnim = 0.2
 
 # source: cube in center of domain (x, y), standing on bottom of the domain
-boxSize = vec3(resF, 0.05*resF, resF/8)
-boxCenter = gsF*vec3(0.5, 0.15, 0.5)
+boxSize = gsG * vec3(1/8, 0.05, resF/8)
+boxCenter = gsG*vec3(0.5, 0.15, 0.5)
 sourceBox = ms.create( Box, center=boxCenter, size=boxSize )
 
 
 # needs positive gravity because of addHeatBuoyancy2()
 gravity = vec3(0,-0.0981,0)
 
-vel = ms.getVelObj()
-flags = ms.getFlagsObj()
-heat = ms.getHeatObj()
-fuel = ms.getFuelObj()
-react = ms.getReactObj()
+vel     = ms.getVelObj()
+flags   = ms.getFlagsObj()
+density = ms.getDensityObj()
+heat    = ms.getHeatObj()
+fuel    = ms.getFuelObj()
+react   = ms.getReactObj()
+flame   = ms.getFlameObj()
+
 
 if (GUI):
 	gui = Gui()
@@ -80,6 +85,7 @@ while ms.frame < frames:
 			scale=1, sigma=0.5)
 		densityInflow(flags=flags, density=react, noise=noise, shape=sourceBox,
 			scale=1, sigma=0.5)
+	mantaMsg('1')
 
 	# global process burn
 	processBurn(fuel=fuel, density=density, react=react, heat=heat)
@@ -90,7 +96,7 @@ while ms.frame < frames:
 	advectSemiLagrange(flags=flags, vel=vel, grid=fuel,    order=2)
 	advectSemiLagrange(flags=flags, vel=vel, grid=react,   order=2)
 	advectSemiLagrange(flags=flags, vel=vel, grid=vel,     order=2,
-		opengBounds=doOpen, boundaryWidth=bWidth)
+		openBounds=doOpen, boundaryWidth=bWidth)
 
 	# global reset outflow
 	if doOpen:
@@ -110,12 +116,14 @@ while ms.frame < frames:
 	ms.mapDataToCoarseGrid()
 
 	# solve pressure coarse
-	solvePressureCoarseGrid()
+	solvePressureCoarseGrid(ms)
 
 	# copy to global
 	ms.mapCoarseDataToFineGrid()
+	ms.gatherGlobalData()
 
 	# global update flame
+	updateFlame( react=react, flame=flame )
 
 	# # coarse grids:
 	# ms.calculateCoarseGrid()

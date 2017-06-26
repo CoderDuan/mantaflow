@@ -20,6 +20,7 @@
 #include "vector4d.h"
 #include <vector>
 #include <map>
+#include <fstream>
 
 namespace Manta { 
 
