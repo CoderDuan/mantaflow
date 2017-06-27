@@ -30,10 +30,8 @@ doOpen = True
 setOpenBoundMultiGrid(ms)
 
 ms.frameLength = 1.2
-ms.timestepMin = 0.2
-ms.timestepMax = 2.0
 ms.cfl         = 3.0
-ms.timestep    = (ms.timestepMax+ms.timestepMin)*0.5
+ms.timestep    = 0.2 #(ms.timestepMax+ms.timestepMin)*0.5
 timings = Timings()
 
 frames = 250
@@ -49,7 +47,7 @@ noise.valOffset = 0.75
 noise.timeAnim = 0.2
 
 # source: cube in center of domain (x, y), standing on bottom of the domain
-boxSize = gsG * vec3(1/8, 0.05, resF/8)
+boxSize = gsG * vec3(1/8, 0.05, 1/8)
 boxCenter = gsG*vec3(0.5, 0.15, 0.5)
 sourceBox = ms.create( Box, center=boxCenter, size=boxSize )
 

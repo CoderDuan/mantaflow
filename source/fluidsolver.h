@@ -22,6 +22,8 @@
 #include <map>
 #include <fstream>
 
+using namespace std;
+
 namespace Manta { 
 
 //! Encodes grid size, timstep etc.
@@ -67,6 +69,9 @@ public:
 	PYTHON(name=timestepMax)  Real mDtMax;  
 	PYTHON(name=frameLength)  Real mFrameLength;
 
+	PYTHON() void openFileStream(std::string filename);
+	PYTHON() void writeFluidData();
+
 protected:
 	Vec3i     mGridSize;
 	const int mDim;
@@ -90,6 +95,7 @@ protected:
 	GridStorage<Real> mGridsReal;
 	GridStorage<Vec3> mGridsVec;
 
+	std::fstream fs;
 
 	//! 4d data section, only required for simulations working with space-time data 
 

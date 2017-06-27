@@ -5,7 +5,7 @@ from manta import *
 
 # solver params
 dim = 2
-res = 36
+res = 18
 gs = vec3(res, res, res)
 if dim==2:
 	gs.z=1
@@ -20,7 +20,7 @@ s.frameLength = 1.2   # length of one frame (in "world time")
 s.timestepMin = 0.2   # time step range
 s.timestepMax = 2.0
 s.cfl         = 3.0   # maximal velocity per cell
-s.timestep    = (s.timestepMax+s.timestepMin)*0.5
+s.timestep    = 1.0   #(s.timestepMax+s.timestepMin)*0.5
 timings = Timings()
 
 # prepare grids
