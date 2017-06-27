@@ -3,6 +3,7 @@
 
 #include "grid.h"
 #include "fluidsolver.h"
+#include <fstream>
 
 using namespace std;
 
@@ -40,6 +41,7 @@ public:
 	Vec3i getFineGridNum() {return mFineGridNum;}
 
 	inline int fineGridIndex(int i, int j, int k) {
+		printf("%d\n", i*mFineGridNum.y*mFineGridNum.z + j*mFineGridNum.z + k);
 		return (i*mFineGridNum.y*mFineGridNum.z + j*mFineGridNum.z + k);
 	}
 
