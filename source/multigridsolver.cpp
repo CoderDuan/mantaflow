@@ -157,7 +157,7 @@ void MultiGridSolver::mapDataToCoarseGrid() {
 }
 
 Vec3 MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
-	printf("%s\n", __func__);
+	//printf("%s\n", __func__);
 	FluidData &cell = mFineDataList[fineGridIndex(i,j,k)];
 	Vec3 v(0,0,0);
 	float pressure = 0;
@@ -228,6 +228,33 @@ void MultiGridSolver::gatherGlobalData() {
 			}
 		}
 	}
+}
+
+void MultiGridSolver::openFileStream(string filename) {
+	if (filename == "")
+		filename = "fluiddata";
+	filename += ".txt";
+	ofs.open(filename, fstream::out);
+	ofs << mGridSize.x << ' ' << mGridSize.y << ' ' << mGridSize.z << ' ' << endl;
+	return;
+}
+
+void MultiGridSolver::writeFluidData() {
+	ofs << mFrame << endl;
+	// velocity
+	MACGrid &velGrid = *(mGlobalData.mVel);
+	for (int i = 0; i < mGridSize.x; i++) {
+		for (int j = 0; j < mGridSize.y; j++) {
+			for (int k = 0; k < mGridSize.z; k++) {
+				Vec3 vel = velGrid.getAt(i,j,k);
+				ofs << vel.x << ' ' << vel.y << ' ' << vel.z << endl;
+			}
+		}
+	}
+}
+
+void MultiGridSolver::closeFileStream() {
+	ofs.close();
 }
 
 }

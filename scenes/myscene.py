@@ -3,8 +3,8 @@ from manta import *
 
 dim = 2
 # resolution
-resC = 6
-resF = 6
+resC = 1
+resF = 12
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
@@ -68,6 +68,8 @@ if (GUI):
 	gui = Gui()
 	gui.show(True)
 
+ms.openFileStream("test1")
+
 while ms.frame < frames:
 	maxvel = vel.getMaxValue()
 	ms.adaptTimestep( maxvel )
@@ -99,6 +101,8 @@ while ms.frame < frames:
 	# global reset outflow
 	if doOpen:
 		resetOutflow(flags=flags, real=density)
+		resetOutflowCoarseGrid(ms)
+		resetOutflowFineGrid(ms)
 
 	# global add buoyancy
 	addBuoyancy(flags=flags, density=density, vel=vel, gravity=(gravity*smokeDensity))
@@ -123,6 +127,7 @@ while ms.frame < frames:
 	# global update flame
 	updateFlame( react=react, flame=flame )
 
+	ms.writeFluidData()
 	# # coarse grids:
 	# ms.calculateCoarseGrid()
 
@@ -164,3 +169,5 @@ while ms.frame < frames:
 
 	timings.display()
 	ms.step()
+
+ms.closeFileStream()

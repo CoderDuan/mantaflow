@@ -210,28 +210,28 @@ void FluidSolver::adaptTimestep(Real maxVel)
 	assertMsg( (mDt > (mDtMin/2.) ) , "Invalid dt encountered! Shouldnt happen..." );
 }
 
-void FluidSolver::openFileStream(std::string filename) {
-	fs.open(filename, fstream::out);
-	return;
-}
+// void FluidSolver::openFileStream(std::string filename) {
+// 	fs.open(filename, fstream::out);
+// 	return;
+// }
 
-void FluidSolver::writeFluidData() {
-	if (is3D()) {
-		for (int i = 0; i < mGridSize.x; i++) {
-			for (int j = 0; j < mGridSize.y; j++) {
-				for (int k = 0; k < mGridSize.z; k++) {
+// void FluidSolver::writeFluidData() {
+// 	if (is3D()) {
+// 		for (int i = 0; i < mGridSize.x; i++) {
+// 			for (int j = 0; j < mGridSize.y; j++) {
+// 				for (int k = 0; k < mGridSize.z; k++) {
 							
-				}
-			}
-		}
-	} else {
-		for (int i = 0; i < mGridSize.x; i++) {
-			for (int j = 0; j < mGridSize.y; j++) {
+// 				}
+// 			}
+// 		}
+// 	} else {
+// 		for (int i = 0; i < mGridSize.x; i++) {
+// 			for (int j = 0; j < mGridSize.y; j++) {
 
-			}
-		}
-	}
-}
+// 			}
+// 		}
+// 	}
+// }
 
 } // manta
 

@@ -41,7 +41,7 @@ public:
 	Vec3i getFineGridNum() {return mFineGridNum;}
 
 	inline int fineGridIndex(int i, int j, int k) {
-		printf("%d\n", i*mFineGridNum.y*mFineGridNum.z + j*mFineGridNum.z + k);
+		//printf("%d\n", i*mFineGridNum.y*mFineGridNum.z + j*mFineGridNum.z + k);
 		return (i*mFineGridNum.y*mFineGridNum.z + j*mFineGridNum.z + k);
 	}
 
@@ -63,6 +63,10 @@ public:
 	PYTHON() PbClass* getHeatObj();
 	PYTHON() PbClass* getFlameObj();
 	PYTHON() PbClass* getPressureObj();
+
+	PYTHON() void openFileStream(string filename);
+	PYTHON() void writeFluidData();
+	PYTHON() void closeFileStream();
 
 	// boundary width: 0 by default
 	int boundaryWidth;
@@ -114,6 +118,8 @@ protected:
 	MACGrid* mCoarseOldVel;
 
 	vector<FluidData> mFineDataList;
+
+	fstream ofs;
 
 	// calculate velocity of one coarse cell(i,j,k), using data of one fine grid(i,j,k)
 	Vec3 calculateCoarseCell(int i, int j, int k);
