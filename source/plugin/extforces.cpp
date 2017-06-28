@@ -218,7 +218,8 @@ PYTHON() void resetOutflowCoarseGrid(MultiGridSolver* mgs) {
 }
 
 PYTHON() void resetOutflowFineGrid(MultiGridSolver* mgs) {
-	Vec3i size = mgs->getCoarseSize();
+	Vec3i size = mgs->getFineGridNum();
+	printf("%d %d %d\n", size.x, size.y, size.z);
 	for (int i = 0; i < size.x; i++) {
 		for (int j = 0; j < size.y; j++) {
 			for (int k = 0; k < size.z; k++) {

@@ -69,8 +69,8 @@ public:
 	PYTHON(name=timestepMax)  Real mDtMax;  
 	PYTHON(name=frameLength)  Real mFrameLength;
 
-	PYTHON() void openFileStream(std::string filename);
-	PYTHON() void writeFluidData();
+	// PYTHON() void openFileStream(std::string filename);
+	// PYTHON() void writeFluidData();
 
 protected:
 	Vec3i     mGridSize;
