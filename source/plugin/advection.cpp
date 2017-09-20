@@ -404,11 +404,11 @@ PYTHON() void advectCoarseGridSL (MultiGridSolver* mgs, int order = 1,
 PYTHON() void advectFineGridSL (MultiGridSolver* mgs, int order = 1,
 								Real strength = 1.0, int orderSpace = 1, bool openBounds = false,
 								int boundaryWidth = 1) {
-	Vec3i coarseSize = mgs->getCoarseSize();
+	Vec3i size = mgs->getFineGridNum();
 
-	for (int i = 0; i < coarseSize.x; i++) {
-		for (int j = 0; j < coarseSize.y; j++) {
-			for (int k = 0; k < coarseSize.z; k++) {
+	for (int i = 0; i < size.x; i++) {
+		for (int j = 0; j < size.y; j++) {
+			for (int k = 0; k < size.z; k++) {
 				FlagGrid* flags = mgs->getFineFlagsGrid(i,j,k);
 				MACGrid* vel = mgs->getFineVelGrid(i,j,k);
 				advectSemiLagrange(flags, vel, mgs->getFineDensityGrid(i,j,k), 2);

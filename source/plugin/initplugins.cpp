@@ -29,7 +29,7 @@ void KnApplyNoiseInfl(FlagGrid& flags, Grid<Real>& density, WaveletNoiseField& n
 {
 	if (!flags.isFluid(i,j,k) || sdf(i,j,k) > sigma) return;
 	Real factor = clamp(1.0-0.5/sigma * (sdf(i,j,k)+sigma), 0.0, 1.0);
-	
+
 	Real target = noise.evaluate(Vec3(i,j,k)) * scale * factor;
 	if (density(i,j,k) < target)
 		density(i,j,k) = target;
@@ -43,13 +43,13 @@ PYTHON() void densityInflow(FlagGrid& flags, Grid<Real>& density, WaveletNoiseFi
 }
 
 //! Init noise-modulated density inside shape
-PYTHON() void densityInflowMultiGrid(MultiGridSolver* mgs, int i, int j, int k, WaveletNoiseField& noise, Shape* shape)
+PYTHON() void densityInflowMultiGrid(MultiGridSolver* mgs, int x, int y, int z, WaveletNoiseField& noise, Shape* shape)
 {
-	FlagGrid* flags = mgs->getFineFlagsGrid(i, j, k);
-	Grid<Real> *density = mgs->getFineDensityGrid(i, j, k);
-	Grid<Real> *heat = mgs->getFineHeatGrid(i, j, k);
-	Grid<Real> *fuel = mgs->getFineFuelGrid(i, j, k);
-	Grid<Real> *react = mgs->getFineReactGrid(i, j, k);
+	FlagGrid* flags = mgs->getFineFlagsGrid(x, y, z);
+	Grid<Real> *density = mgs->getFineDensityGrid(x, y, z);
+	Grid<Real> *heat = mgs->getFineHeatGrid(x, y, z);
+	Grid<Real> *fuel = mgs->getFineFuelGrid(x, y, z);
+	Grid<Real> *react = mgs->getFineReactGrid(x, y, z);
 
 	densityInflow(*flags, *density, noise, shape, 1, 0.5);
 	densityInflow(*flags, *heat, noise, shape, 1, 0.5);

@@ -90,7 +90,7 @@ PYTHON() void processBurnCoarseGrid(MultiGridSolver* mgs)
 
 PYTHON() void processBurnFineGrid(MultiGridSolver* mgs)
 {
-	Vec3i size = mgs->getCoarseSize();
+	Vec3i size = mgs->getFineGridNum();
 	for (int i = 0; i < size.x; i++) {
 		for (int j = 0; j < size.y; j++) {
 			for (int k = 0; k < size.z; k++) {
@@ -124,7 +124,7 @@ PYTHON() void updateFlameCoarseGrid(MultiGridSolver* mgs) {
 }
 
 PYTHON() void updateFlameFineGrid(MultiGridSolver* mgs) {
-	Vec3i size = mgs->getCoarseSize();
+	Vec3i size = mgs->getFineGridNum();
 	for (int i = 0; i < size.x; i++) {
 		for (int j = 0; j < size.y; j++) {
 			for (int k = 0; k < size.z; k++) {

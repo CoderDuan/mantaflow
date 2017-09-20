@@ -1,10 +1,10 @@
 
 from manta import *
 
-dim = 2
+dim = 3
 # resolution
-resC = 1
-resF = 12
+resC = 2
+resF = 8
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
@@ -85,7 +85,7 @@ while ms.frame < frames:
 			scale=1, sigma=0.5)
 		densityInflow(flags=flags, density=react, noise=noise, shape=sourceBox,
 			scale=1, sigma=0.5)
-	mantaMsg('1')
+	# mantaMsg('1')
 
 	# global process burn
 	processBurn(fuel=fuel, density=density, react=react, heat=heat)
@@ -119,7 +119,6 @@ while ms.frame < frames:
 
 	# solve pressure coarse
 	solvePressureCoarseGrid(ms)
-
 	# copy to global
 	ms.mapCoarseDataToFineGrid()
 	ms.gatherGlobalData()
@@ -127,47 +126,45 @@ while ms.frame < frames:
 	# global update flame
 	updateFlame( react=react, flame=flame )
 
-	ms.writeFluidData()
+	# ms.writeFluidData()
 	# # coarse grids:
-	# ms.calculateCoarseGrid()
 
-	# processBurnCoarseGrid(ms)
-	# advectCoarseGridSL(ms)
+	processBurnCoarseGrid(ms)
+	advectCoarseGridSL(ms)
 
-	# resetOutflowCoarseGrid(ms)
+	resetOutflowCoarseGrid(ms)
 
+	addBuoyancyCoarseDensityGrid(ms, gravity*smokeDensity/resF)
+	addBuoyancyCoarseHeatGrid(ms, gravity*smokeTempDiff/resF)
 
-	# addBuoyancyCoarseDensityGrid(ms, gravity*smokeDensity/resF)
-	# addBuoyancyCoarseHeatGrid(ms, gravity*smokeTempDiff/resF)
+	solvePressureCoarseGrid(ms)
 
-	# solvePressureCoarseGrid(ms)
-
-	# updateFlameCoarseGrid(ms)
-
-	# ms.calculateFineGrid()	
+	updateFlameCoarseGrid(ms)
 
 	# # fine grids:
-	# if ms.timeTotal<250:
-	# 	densityInflowMultiGrid(ms, 1, 1, int(gsC.z/2), noise, sourceBox)
+	if ms.timeTotal<250:
+		densityInflowMultiGrid(ms, 1, 1, 1, noise, sourceBox)
 
-	# processBurnFineGrid(ms)
+	processBurnFineGrid(ms)
 
-	# advectFineGridSL(ms)
+	advectFineGridSL(ms)
+	if doOpen:
+		resetOutflowFineGrid(ms)
 
-	# if doOpen:
-	# 	resetOutflowFineGrid(ms)
+	addBuoyancyFineDensityGrid(ms, gravity*smokeDensity)
+	addBuoyancyFineHeatGrid(ms, gravity*smokeTempDiff)
 
-	# addBuoyancyFineDensityGrid(ms, gravity*smokeDensity)
-	# addBuoyancyFineHeatGrid(ms, gravity*smokeTempDiff)
+	mantaMsg('222222222222')
+	solvePressureFineGrid(ms)
 
-	# solvePressureFineGrid(ms)
+	mantaMsg('3333333333333')
+	updateFlameFineGrid(ms)
 
-	# updateFlameFineGrid(ms)
+	mantaMsg('44444444444444')
+	ms.gatherGlobalData()
+	updateFlame( react=react, flame=flame )
 
-	# ms.gatherGlobalData()
-	# # updateFlame( react=react, flame=flame )
-
-	timings.display()
+	# timings.display()
 	ms.step()
 
 ms.closeFileStream()
