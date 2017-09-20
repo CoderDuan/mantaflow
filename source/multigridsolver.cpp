@@ -118,7 +118,7 @@ PbClass* MultiGridSolver::getPressureObj() {
 }
 
 void MultiGridSolver::mapDataToFineGrid() {
-	printf("%s\n", __func__);
+	//printf("%s\n", __func__);
 	if (is3D()) {
 		for (int i = 0; i < mFineGridNum.x; i++) {
 			for (int j = 0; j < mFineGridNum.y; j++) {
@@ -145,7 +145,7 @@ void MultiGridSolver::mapDataToFineGrid() {
 }
 
 void MultiGridSolver::mapDataToCoarseGrid() {
-	printf("%s\n", __func__);
+	//printf("%s\n", __func__);
 	for (int i = 0; i < mFineGridNum.x; i++) {
 		for (int j = 0; j < mFineGridNum.y; j++) {
 			for (int k = 0; k < mFineGridNum.z; k++) {
@@ -189,7 +189,7 @@ Vec3 MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
 }
 
 void MultiGridSolver::mapCoarseDataToFineGrid() {
-	printf("%s\n", __func__);
+	//printf("%s\n", __func__);
 	for (int i = 0; i < mFineGridNum.x; i++) {
 		for (int j = 0; j < mFineGridNum.y; j++) {
 			for (int k = 0; k < mFineGridNum.z; k++) {
@@ -209,7 +209,7 @@ void MultiGridSolver::mapCoarseDataToFineGrid() {
 }
 
 void MultiGridSolver::gatherGlobalData() {
-	printf("%s\n", __func__);
+	//printf("%s\n", __func__);
 	Vec3i offset = Vec3i(1,1,1);
 	if (!is3D()) offset.z = 0;
 	for (int idx = 0; idx < mFineGridNum.x; idx++) {

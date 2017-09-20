@@ -90,7 +90,7 @@ PYTHON() void addBuoyancyCoarseHeatGrid(MultiGridSolver* mgs, Vec3 gravity) {
 }
 
 PYTHON() void addBuoyancyFineDensityGrid(MultiGridSolver* mgs, Vec3 gravity) {
-	Vec3i size = mgs->getCoarseSize();
+	Vec3i size = mgs->getFineGridNum();
 	for (int i = 0; i < size.x; i++) {
 		for (int j = 0; j < size.y; j++) {
 			for (int k = 0; k < size.z; k++) {
@@ -104,7 +104,7 @@ PYTHON() void addBuoyancyFineDensityGrid(MultiGridSolver* mgs, Vec3 gravity) {
 }
 
 PYTHON() void addBuoyancyFineHeatGrid(MultiGridSolver* mgs, Vec3 gravity) {
-	Vec3i size = mgs->getCoarseSize();
+	Vec3i size = mgs->getFineGridNum();
 	for (int i = 0; i < size.x; i++) {
 		for (int j = 0; j < size.y; j++) {
 			for (int k = 0; k < size.z; k++) {
@@ -219,7 +219,7 @@ PYTHON() void resetOutflowCoarseGrid(MultiGridSolver* mgs) {
 
 PYTHON() void resetOutflowFineGrid(MultiGridSolver* mgs) {
 	Vec3i size = mgs->getFineGridNum();
-	printf("%d %d %d\n", size.x, size.y, size.z);
+	//printf("%d %d %d\n", size.x, size.y, size.z);
 	for (int i = 0; i < size.x; i++) {
 		for (int j = 0; j < size.y; j++) {
 			for (int k = 0; k < size.z; k++) {
