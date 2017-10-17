@@ -259,10 +259,10 @@ template<class T> void Grid<T>::copyFromGlobal(Grid<T> &global, int startX, int 
 		for (int j = 0; j < sizeY; j++) {
 			if (sizeZ > 1) { //3D
 				for (int k = 0; k < sizeZ; k++) {
-					mData[index(i+1,j+1,k+1)] = global.getAt(startX+i, startY+j, startZ+k);
+					mData[index(i,j,k)] = global.getAt(startX+i, startY+j, startZ+k);
 				}
 			} else { //2D
-				mData[index(i+1,j+1,0)] = global.getAt(startX+i, startY+j, startZ);
+				mData[index(i,j,0)] = global.getAt(startX+i, startY+j, startZ);
 			}
 		}
 	}

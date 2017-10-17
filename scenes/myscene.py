@@ -1,10 +1,10 @@
 
 from manta import *
 
-dim = 3
+dim = 2
 # resolution
-resC = 2
-resF = 8
+resC = 12
+resF = 6
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
@@ -74,7 +74,6 @@ while ms.frame < frames:
 	maxvel = vel.getMaxValue()
 	ms.adaptTimestep( maxvel )
 	mantaMsg('\nFrame %i, time-step size %f' % (ms.frame, ms.timestep))
-	
 	# global inflow
 	if ms.timeTotal < 250:
 		densityInflow(flags=flags, density=density, noise=noise, shape=sourceBox,
@@ -86,10 +85,8 @@ while ms.frame < frames:
 		densityInflow(flags=flags, density=react, noise=noise, shape=sourceBox,
 			scale=1, sigma=0.5)
 	# mantaMsg('1')
-
 	# global process burn
 	processBurn(fuel=fuel, density=density, react=react, heat=heat)
-
 	# global advectSL
 	advectSemiLagrange(flags=flags, vel=vel, grid=density, order=2)
 	advectSemiLagrange(flags=flags, vel=vel, grid=heat,    order=2)
@@ -107,7 +104,6 @@ while ms.frame < frames:
 	# global add buoyancy
 	addBuoyancy(flags=flags, density=density, vel=vel, gravity=(gravity*smokeDensity))
 	addBuoyancy(flags=flags, density=heat,    vel=vel, gravity=(gravity*smokeTempDiff))
-
 	# global copy to fine
 	ms.mapDataToFineGrid()
 
@@ -143,7 +139,7 @@ while ms.frame < frames:
 
 	# # fine grids:
 	if ms.timeTotal<250:
-		densityInflowMultiGrid(ms, 1, 1, 1, noise, sourceBox)
+		densityInflowMultiGrid(ms, 0, 0, 0, noise, sourceBox)
 
 	processBurnFineGrid(ms)
 
@@ -154,13 +150,10 @@ while ms.frame < frames:
 	addBuoyancyFineDensityGrid(ms, gravity*smokeDensity)
 	addBuoyancyFineHeatGrid(ms, gravity*smokeTempDiff)
 
-	mantaMsg('222222222222')
 	solvePressureFineGrid(ms)
 
-	mantaMsg('3333333333333')
 	updateFlameFineGrid(ms)
 
-	mantaMsg('44444444444444')
 	ms.gatherGlobalData()
 	updateFlame( react=react, flame=flame )
 

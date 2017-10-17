@@ -124,10 +124,10 @@ void MultiGridSolver::mapDataToFineGrid() {
 			for (int j = 0; j < mFineGridNum.y; j++) {
 				for (int k = 0; k < mFineGridNum.z; k++) {
 					FluidData &fdata = mFineDataList[fineGridIndex(i,j,k)];
-					Vec3i start = Vec3i(i,j,k)*mFineGridNum + Vec3i(1,1,1);
+					Vec3i start = Vec3i(i,j,k)*mFineSizeEffective;
 					fdata.mVel->copyFromGlobal(*(mGlobalData.mVel),
 						start.x, start.y, start.z,
-						mFineSizeEffective.x, mFineSizeEffective.y, mFineSizeEffective.z);
+						mFineSize.x, mFineSize.y, mFineSize.z);
 				}
 			}
 		}
@@ -135,10 +135,10 @@ void MultiGridSolver::mapDataToFineGrid() {
 		for (int i = 0; i < mFineGridNum.x; i++) {
 			for (int j = 0; j < mFineGridNum.y; j++) {
 				FluidData &fdata = mFineDataList[fineGridIndex(i,j,0)];
-				Vec3i start = Vec3i(i,j,0)*mFineGridNum + Vec3i(1,1,0);
+				Vec3i start = Vec3i(i,j,0)*mFineSizeEffective;
 				fdata.mVel->copyFromGlobal(*(mGlobalData.mVel),
 					start.x, start.y, start.z,
-					mFineSizeEffective.x, mFineSizeEffective.y, mFineSizeEffective.z);
+					mFineSize.x, mFineSize.y, mFineSize.z);
 			}
 		}
 	}
@@ -178,12 +178,12 @@ Vec3 MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
 		}
 	}
 
-	v = v/cnt;
+	v = v/(float)cnt;
 	// v.x /= mFineSizeEffective.x;
 	// v.y /= mFineSizeEffective.y;
 	// v.z /= mFineSizeEffective.z;
 
-	pressure /= cnt;
+	pressure /= (float)cnt;
 
 	return v;
 }
@@ -197,14 +197,13 @@ void MultiGridSolver::mapCoarseDataToFineGrid() {
 
 				Vec3 dv = (mCoarseData.mVel->getAt(i+1, j+1, k+1)
 					- mCoarseOldVel->getAt(i+1, j+1, k+1));
-				//printf("(%d,%d,%d):(%f,%f,%f)\n", i,j,k,dv.x,dv.y,dv.z);
-				// dv.x *= mFineSizeEffective.x;
-				// dv.y *= mFineSizeEffective.y;
-				// dv.z *= mFineSizeEffective.z;
+
+				//printf("(%.2f,%.2f,%.2f)\t", dv.x, dv.y, dv.z);
 
 				fdata.mVel->addConst(dv);
 			}
 		}
+		//printf("\n");
 	}
 }
 
