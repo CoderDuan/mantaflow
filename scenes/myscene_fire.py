@@ -5,7 +5,7 @@ from manta import *
 
 # solver params
 dim = 2
-res = 64
+res = 24
 gs = vec3(res, res, res)
 if dim==2:
 	gs.z=1
@@ -69,8 +69,8 @@ sourceBox = s.create( Box, center=boxCenter, size=boxSize )
 
 # main loop
 while s.frame < frames:
-	maxvel = vel.getMax()
-	s.adaptTimestep( maxvel )
+	maxvel = vel.getMaxValue()
+	#s.adaptTimestep( maxvel )
 	mantaMsg('\nFrame %i, time-step size %f' % (s.frame, s.timestep))
 	
 	if s.timeTotal<200:
