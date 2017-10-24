@@ -179,9 +179,6 @@ Vec3 MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
 	}
 
 	v = v/(float)cnt;
-	// v.x /= mFineSizeEffective.x;
-	// v.y /= mFineSizeEffective.y;
-	// v.z /= mFineSizeEffective.z;
 
 	pressure /= (float)cnt;
 
@@ -198,12 +195,9 @@ void MultiGridSolver::mapCoarseDataToFineGrid() {
 				Vec3 dv = (mCoarseData.mVel->getAt(i+1, j+1, k+1)
 					- mCoarseOldVel->getAt(i+1, j+1, k+1));
 
-				//printf("(%.2f,%.2f,%.2f)\t", dv.x, dv.y, dv.z);
-
 				fdata.mVel->addConst(dv);
 			}
 		}
-		//printf("\n");
 	}
 }
 
