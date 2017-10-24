@@ -1,10 +1,10 @@
 
 from manta import *
 
-dim = 2
+dim = 3
 # resolution
-resC = 12
-resF = 6
+resC = 8
+resF = 8
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
@@ -63,6 +63,10 @@ fuel    = ms.getFuelObj()
 react   = ms.getReactObj()
 flame   = ms.getFlameObj()
 
+flags.initDomain( boundaryWidth=bWidth )
+flags.fillGrid()
+if doOpen:
+	setOpenBound( flags, bWidth,'xXyYzZ',FlagOutflow|FlagEmpty )
 
 if (GUI):
 	gui = Gui()
@@ -98,20 +102,21 @@ while ms.frame < frames:
 	# global reset outflow
 	if doOpen:
 		resetOutflow(flags=flags, real=density)
-		resetOutflowCoarseGrid(ms)
-		resetOutflowFineGrid(ms)
+		#resetOutflowCoarseGrid(ms)
+		#resetOutflowFineGrid(ms)
 
 	# global add buoyancy
 	addBuoyancy(flags=flags, density=density, vel=vel, gravity=(gravity*smokeDensity))
 	addBuoyancy(flags=flags, density=heat,    vel=vel, gravity=(gravity*smokeTempDiff))
+
 	# global copy to fine
 	ms.mapDataToFineGrid()
 
-	# solve pressure fine
-	solvePressureFineGrid(ms)
-
 	# global copy to coarse
 	ms.mapDataToCoarseGrid()
+
+	# solve pressure fine
+	solvePressureFineGrid(ms)
 
 	# solve pressure coarse
 	solvePressureCoarseGrid(ms)
@@ -119,45 +124,9 @@ while ms.frame < frames:
 	ms.mapCoarseDataToFineGrid()
 	ms.gatherGlobalData()
 
-	# global update flame
 	updateFlame( react=react, flame=flame )
 
-	# ms.writeFluidData()
-	# # coarse grids:
-
-	processBurnCoarseGrid(ms)
-	advectCoarseGridSL(ms)
-
-	resetOutflowCoarseGrid(ms)
-
-	addBuoyancyCoarseDensityGrid(ms, gravity*smokeDensity/resF)
-	addBuoyancyCoarseHeatGrid(ms, gravity*smokeTempDiff/resF)
-
-	solvePressureCoarseGrid(ms)
-
-	updateFlameCoarseGrid(ms)
-
-	# # fine grids:
-	if ms.timeTotal<250:
-		densityInflowMultiGrid(ms, 0, 0, 0, noise, sourceBox)
-
-	processBurnFineGrid(ms)
-
-	advectFineGridSL(ms)
-	if doOpen:
-		resetOutflowFineGrid(ms)
-
-	addBuoyancyFineDensityGrid(ms, gravity*smokeDensity)
-	addBuoyancyFineHeatGrid(ms, gravity*smokeTempDiff)
-
-	solvePressureFineGrid(ms)
-
-	updateFlameFineGrid(ms)
-
-	ms.gatherGlobalData()
-	updateFlame( react=react, flame=flame )
-
-	# timings.display()
+	timings.display()
 	ms.step()
 
 ms.closeFileStream()
