@@ -154,7 +154,7 @@ PYTHON() void setOpenBound(FlagGrid& flags, int bWidth, string openBound = "", i
 	}
 }
 
- PYTHON() void setOpenBoundMultiGrid(MultiGridSolver* mgs) {
+PYTHON() void setOpenBoundMultiGrid(MultiGridSolver* mgs) {
 	// Global flag grid:
 	setOpenBound(*(mgs->getFlagsGrid()), mgs->boundaryWidth, "xXyYzZ",
 		FlagGrid::TypeOutflow | FlagGrid::TypeEmpty);

@@ -3,8 +3,8 @@ from manta import *
 
 dim = 3
 # resolution
-resC = 8
-resF = 8
+resC = 6
+resF = 6
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
@@ -66,13 +66,11 @@ flame   = ms.getFlameObj()
 flags.initDomain( boundaryWidth=bWidth )
 flags.fillGrid()
 if doOpen:
-	setOpenBound( flags, bWidth,'xXyYzZ',FlagOutflow|FlagEmpty )
+	setOpenBound( flags, bWidth, 'xXyYzZ', FlagOutflow | FlagEmpty )
 
 if (GUI):
 	gui = Gui()
 	gui.show(True)
-
-ms.openFileStream("test1")
 
 while ms.frame < frames:
 	maxvel = vel.getMaxValue()
@@ -128,5 +126,3 @@ while ms.frame < frames:
 
 	timings.display()
 	ms.step()
-
-ms.closeFileStream()
