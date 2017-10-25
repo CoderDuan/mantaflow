@@ -36,9 +36,9 @@ public:
 
 	PYTHON() void setMultiGridSolver(FluidSolver* coarseGridSolver, FluidSolver* fineGridSolver);
 
-	Vec3i getCoarseSize () {return mCoarseSize;}
-	Vec3i getFineSize   () {return mFineSize;}
-	Vec3i getFineGridNum() {return mFineGridNum;}
+	PYTHON() Vec3i getCoarseSize ();
+	PYTHON() Vec3i getFineSize   ();
+	PYTHON() Vec3i getFineGridNum();
 
 	inline int fineGridIndex(int i, int j, int k) {
 		//printf("%d\n", i*mFineGridNum.y*mFineGridNum.z + j*mFineGridNum.z + k);
@@ -92,6 +92,7 @@ public:
 	Grid<Real>* getCoarsePressureGrid() {return mCoarseData.mPressure;}
 
 	// Fine grids
+	PYTHON() PbClass* getFineFlagsGridObj(int i, int j, int k);
 	FlagGrid*   getFineFlagsGrid   (int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mFlags;}
 	MACGrid*    getFineVelGrid     (int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mVel;}
 	Grid<Real>* getFineDensityGrid (int i, int j, int k) {return mFineDataList[fineGridIndex(i,j,k)].mDensity;}
@@ -122,7 +123,7 @@ protected:
 	fstream ofs;
 
 	// calculate velocity of one coarse cell(i,j,k), using data of one fine grid(i,j,k)
-	Vec3 calculateCoarseCell(int i, int j, int k);
+	std::pair<Vec3, float> calculateCoarseCell(int i, int j, int k);
 };
 
 }
