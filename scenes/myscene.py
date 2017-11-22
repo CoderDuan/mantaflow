@@ -1,7 +1,7 @@
 
 from manta import *
 
-dim = 3
+dim = 2
 # resolution
 resC = 6
 resF = 6
@@ -34,7 +34,7 @@ ms.cfl         = 3.0
 ms.timestep    = 0.2 #(ms.timestepMax+ms.timestepMin)*0.5
 timings = Timings()
 
-frames = 250
+frames = 20
 
 # noise
 noise = fsolver.create(NoiseField, loadFromFile=True)
@@ -47,8 +47,8 @@ noise.valOffset = 0.75
 noise.timeAnim = 0.2
 
 # source: cube in center of domain (x, y), standing on bottom of the domain
-boxSize = gsG * vec3(1/8, 0.05, 1/8)
-boxCenter = gsG*vec3(0.5, 0.15, 0.5)
+boxSize = gsG * vec3(0.13, 0.15, 0.03)
+boxCenter = gsG*vec3(0.6, 0.02, 0.5)
 sourceBox = ms.create( Box, center=boxCenter, size=boxSize )
 
 
@@ -62,6 +62,7 @@ heat    = ms.getHeatObj()
 fuel    = ms.getFuelObj()
 react   = ms.getReactObj()
 flame   = ms.getFlameObj()
+pressure = ms.getPressureObj()
 
 flags.initDomain( boundaryWidth=bWidth )
 flags.fillGrid()
@@ -72,7 +73,10 @@ if (GUI):
 	gui = Gui()
 	gui.show(True)
 
-while ms.frame < frames:
+first_frame = True
+cnt = 450
+total = cnt + 50
+while cnt < total:
 	maxvel = vel.getMaxValue()
 	ms.adaptTimestep( maxvel )
 	mantaMsg('\nFrame %i, time-step size %f' % (ms.frame, ms.timestep))
@@ -118,11 +122,22 @@ while ms.frame < frames:
 
 	# solve pressure coarse
 	solvePressureCoarseGrid(ms)
-	# copy to global
-	ms.mapCoarseDataToFineGrid()
+
+	solvePressure( flags=flags, vel=vel, pressure=pressure )
+
 	ms.gatherGlobalData()
+	if (first_frame):
+		first_frame = False
+	else:
+		ms.writeFluidData(str(cnt))
+		print ("cnt:", cnt)
+		cnt = cnt + 1
+
+	# copy to global
+	# ms.mapCoarseDataToFineGrid()
+	# ms.gatherGlobalData()
 
 	updateFlame( react=react, flame=flame )
 
-	timings.display()
+	# timings.display()
 	ms.step()
