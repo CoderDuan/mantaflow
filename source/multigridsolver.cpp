@@ -66,6 +66,7 @@ void MultiGridSolver::initMultiGrid(int dim, int bWidth) {
 	PbType pt;
 	pt.S = "MACGrid";
 	mCoarseOldVel = (MACGrid*)mCoarseSolver->create(pt, PbTypeVec(), "");
+	mGlobalVel_tmp = (MACGrid*)create(pt, PbTypeVec(), "");
 
 	if (mFineSolver == NULL)
 		return;
@@ -160,6 +161,7 @@ void MultiGridSolver::mapDataToFineGrid() {
 
 void MultiGridSolver::mapDataToCoarseGrid() {
 	//printf("%s\n", __func__);
+	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
 	for (int i = 0; i < mFineGridNum.x; i++) {
 		for (int j = 0; j < mFineGridNum.y; j++) {
 			for (int k = 0; k < mFineGridNum.z; k++) {
@@ -170,7 +172,6 @@ void MultiGridSolver::mapDataToCoarseGrid() {
 			}
 		}
 	}
-	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
 }
 
 std::pair<Vec3, float> MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
@@ -227,38 +228,61 @@ void MultiGridSolver::gatherGlobalData() {
 			for (int idz = 0; idz < mFineGridNum.z; idz++) {
 				Vec3i pos = Vec3i(idx, idy, idz) * mFineSizeEffective + offset;
 				FluidData &fdata = mFineDataList[fineGridIndex(idx,idy,idz)];
-				mGlobalData.mVel->copyFromFine(pos, *(fdata.mVel), mFineSize);
-				mGlobalData.mPressure->copyFromFine(pos, *(fdata.mPressure), mFineSize);
+				// mGlobalData.mVel->copyFromFine(pos, *(fdata.mVel), mFineSize);
+				// mGlobalData.mPressure->copyFromFine(pos, *(fdata.mPressure), mFineSize);
+				mGlobalVel_tmp->copyFromFine(pos, *(fdata.mVel), mFineSize);
 			}
 		}
 	}
 }
 
-void MultiGridSolver::openFileStream(string filename) {
-	if (filename == "")
-		filename = "fluiddata";
-	filename += ".txt";
-	ofs.open(filename, fstream::out);
-	ofs << mGridSize.x << ' ' << mGridSize.y << ' ' << mGridSize.z << ' ' << endl;
-	return;
-}
-
-void MultiGridSolver::writeFluidData() {
-	ofs << mFrame << endl;
-	// velocity
-	MACGrid &velGrid = *(mGlobalData.mVel);
-	for (int i = 0; i < mGridSize.x; i++) {
-		for (int j = 0; j < mGridSize.y; j++) {
-			for (int k = 0; k < mGridSize.z; k++) {
-				Vec3 vel = velGrid.getAt(i,j,k);
-				ofs << vel.x << ' ' << vel.y << ' ' << vel.z << endl;
-			}
-		}
+template<class T>
+void MultiGridSolver::writeGridData(string filename, Grid<T>* grid) {
+	debMsg( "writing grid to text file " << filename, 1);
+	ofstream ofs(filename.c_str());
+	FOR_IJK_BND(*grid, 1) {
+		ofs << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
 	}
-}
-
-void MultiGridSolver::closeFileStream() {
 	ofs.close();
+}
+
+void MultiGridSolver::writeFluidData(string filename) {
+	string global_filename = "data/global" + filename + ".txt";
+
+	writeGridData("data/global" + filename + ".txt", mGlobalVel_tmp);
+	writeGridData("data/coarse" + filename + ".txt", mCoarseData.mVel);
+	writeGridData("data/coarse_old" + filename + ".txt", mCoarseOldVel);
+	writeGridData("data/groundtruth" + filename + ".txt", mGlobalData.mVel);
+
+	// ofstream ofs_global(("data/global" + filename + ".txt").c_str());
+	// auto grid = mGlobalVel_tmp;
+	// FOR_IJK_BND(*grid, 1) {
+	// 	ofs_global << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
+	// }
+	// ofs_global.close();
+
+	// ofstream ofs_coarse(("data/coarse" + filename + ".txt").c_str());
+	// grid = mCoarseData.mVel;
+	// FOR_IJK_BND(*grid, 1) {
+	// 	ofs_coarse << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
+	// }
+	// ofs_coarse.close();
+
+	// ofstream ofs_coarse(("data/coarse" + filename + ".txt").c_str());
+	// grid = mCoarseData.mVel;
+	// FOR_IJK_BND(*grid, 1) {
+	// 	ofs_coarse << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
+	// }
+	// ofs_coarse.close();
+
+	// ground truth
+	// ofstream ofs_groundtruth(("data/groundtruth" + filename + ".txt").c_str());
+	// grid = mGlobalData.mVel;
+	// FOR_IJK_BND(*grid, 1) {
+	// 	ofs_groundtruth << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
+	// }
+	// ofs_coarse.close();
+
 }
 
 }

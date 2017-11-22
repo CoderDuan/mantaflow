@@ -4,6 +4,7 @@
 #include "grid.h"
 #include "fluidsolver.h"
 #include <fstream>
+#include "fileio.h"
 
 using namespace std;
 
@@ -64,9 +65,8 @@ public:
 	PYTHON() PbClass* getFlameObj();
 	PYTHON() PbClass* getPressureObj();
 
-	PYTHON() void openFileStream(string filename);
-	PYTHON() void writeFluidData();
-	PYTHON() void closeFileStream();
+	PYTHON() void writeFluidData(string filename);
+	template<class T> void writeGridData(string filename, Grid<T>* grid);
 
 	// boundary width: 0 by default
 	int boundaryWidth;
@@ -117,6 +117,7 @@ protected:
 	FluidData mCoarseData;
 
 	MACGrid* mCoarseOldVel;
+	MACGrid* mGlobalVel_tmp;
 
 	vector<FluidData> mFineDataList;
 
