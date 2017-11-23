@@ -51,7 +51,6 @@ boxSize = gsG * vec3(0.13, 0.15, 0.03)
 boxCenter = gsG*vec3(0.6, 0.02, 0.5)
 sourceBox = ms.create( Box, center=boxCenter, size=boxSize )
 
-
 # needs positive gravity because of addHeatBuoyancy2()
 gravity = vec3(0,-0.0981,0)
 
@@ -78,8 +77,8 @@ cnt = 450
 total = cnt + 50
 while cnt < total:
 	maxvel = vel.getMaxValue()
-	ms.adaptTimestep( maxvel )
-	mantaMsg('\nFrame %i, time-step size %f' % (ms.frame, ms.timestep))
+	ms.adaptTimestep( maxvel * 10.0 )
+	mantaMsg('\nFrame %i, time-step size %f, maxVel: %f' % (ms.frame, ms.timestep, maxvel))
 	# global inflow
 	if ms.timeTotal < 250:
 		densityInflow(flags=flags, density=density, noise=noise, shape=sourceBox,
@@ -126,12 +125,12 @@ while cnt < total:
 	solvePressure( flags=flags, vel=vel, pressure=pressure )
 
 	ms.gatherGlobalData()
-	if (first_frame):
-		first_frame = False
-	else:
-		ms.writeFluidData(str(cnt))
-		print ("cnt:", cnt)
-		cnt = cnt + 1
+	# if (first_frame):
+	# 	first_frame = False
+	# else:
+	# 	ms.writeFluidData(str(cnt))
+	# 	print ("cnt:", cnt)
+	# 	cnt = cnt + 1
 
 	# copy to global
 	# ms.mapCoarseDataToFineGrid()
