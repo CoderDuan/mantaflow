@@ -30,7 +30,7 @@ NUM_LABELS = resC*resF*resC*resF*VECTOR_DIM #10
 DATA_SIZE = 500
 VALIDATION_SIZE = 20#5000  # Size of the validation set.
 BATCH_SIZE = 10
-NUM_EPOCHS = 1000
+NUM_EPOCHS = 100000
 
 tf.app.flags.DEFINE_boolean("self_test", True, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
@@ -187,9 +187,11 @@ def main(argv=None):  # pylint: disable=unused-argument
                 print 'Epoch %.3f, Minibatch loss: %.6f' % (float(step) * BATCH_SIZE / train_size, l)
                 sys.stdout.flush()
 
-        # save the model
-        saver = tf.train.Saver()
-        saver.save(s, 'cnn_test_model', global_step=int(num_epochs * train_size / BATCH_SIZE))
+            # save the model
+            if int(step+1) % 2000 == 0:
+                saver = tf.train.Saver()
+        	path = saver.save(s, './save/cnn_test_model', global_step=int(step))
+		print 'Saving result to ' + path
 
 if __name__ == '__main__':
     tf.app.run()
