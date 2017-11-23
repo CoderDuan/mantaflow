@@ -1,2 +1,2 @@
-model_checkpoint_path: "cnn_test_model-960000"
-all_model_checkpoint_paths: "cnn_test_model-960000"
+model_checkpoint_path: "cnn_test_model-4799999"
+all_model_checkpoint_paths: "cnn_test_model-4799999"
