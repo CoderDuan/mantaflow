@@ -254,35 +254,6 @@ void MultiGridSolver::writeFluidData(string filename) {
 	writeGridData("data/coarse_old" + filename + ".txt", mCoarseOldVel);
 	writeGridData("data/groundtruth" + filename + ".txt", mGlobalData.mVel);
 
-	// ofstream ofs_global(("data/global" + filename + ".txt").c_str());
-	// auto grid = mGlobalVel_tmp;
-	// FOR_IJK_BND(*grid, 1) {
-	// 	ofs_global << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
-	// }
-	// ofs_global.close();
-
-	// ofstream ofs_coarse(("data/coarse" + filename + ".txt").c_str());
-	// grid = mCoarseData.mVel;
-	// FOR_IJK_BND(*grid, 1) {
-	// 	ofs_coarse << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
-	// }
-	// ofs_coarse.close();
-
-	// ofstream ofs_coarse(("data/coarse" + filename + ".txt").c_str());
-	// grid = mCoarseData.mVel;
-	// FOR_IJK_BND(*grid, 1) {
-	// 	ofs_coarse << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
-	// }
-	// ofs_coarse.close();
-
-	// ground truth
-	// ofstream ofs_groundtruth(("data/groundtruth" + filename + ".txt").c_str());
-	// grid = mGlobalData.mVel;
-	// FOR_IJK_BND(*grid, 1) {
-	// 	ofs_groundtruth << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
-	// }
-	// ofs_coarse.close();
-
 }
 
 }

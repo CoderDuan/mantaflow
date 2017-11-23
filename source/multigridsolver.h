@@ -121,8 +121,6 @@ protected:
 
 	vector<FluidData> mFineDataList;
 
-	fstream ofs;
-
 	// calculate velocity of one coarse cell(i,j,k), using data of one fine grid(i,j,k)
 	std::pair<Vec3, float> calculateCoarseCell(int i, int j, int k);
 };
