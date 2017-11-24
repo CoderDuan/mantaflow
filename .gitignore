@@ -5,3 +5,7 @@ tools/tests/*.uni
 tools/tests/*.pyc
 tools/tests/*.bin
 doc
+data
+scenes/data
+scenes/steps.txt
+data0
