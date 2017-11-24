@@ -1,2 +1,0 @@
-/home/dalab/workspace/fluid/manta/build/CMakeFiles/manta.dir
-/home/dalab/workspace/fluid/manta/build/CMakeFiles/prep.dir

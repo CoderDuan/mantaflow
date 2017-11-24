@@ -1,0 +1,37 @@
+output fluid data
+	without "0" boundarys ... done 
+define input output format ... done
+
+read train data n*n*3 ... done
+	# coarse_data = np.loadtxt("../data/coarse0.txt")
+	# coarse_data = coarse_data.reshape([resC, resC, 3])
+
+enlarge the coarse data to size of global data ... done
+
+concatenate global data, coarse data(enlarged) and coarse data(last frame, enlarged) into one matrix
+
+record the ground truth data ... done
+
+construct cnn {
+	2 conv layer of global data ... done
+	1 conv layer of coarse data (enlarged) ... done
+
+    training step {
+        validation data ... done
+        validate while training
+    }
+}
+
+save the training result ... done
+generate more data
+
+load the training result {
+    use tf, numpy in manta
+    convert manta matrix obj into numpy array
+}
+
+
+apply training result to simulation
+
+
+

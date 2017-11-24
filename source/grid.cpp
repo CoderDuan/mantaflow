@@ -165,11 +165,6 @@ Real CompMaxVec(Grid<Vec3>& val) {
 		maxVal = s;
 }
 
-
-template<class T> Grid<T>& Grid<T>::safeDivide (const Grid<T>& a) {
-	gridSafeDiv<T> (*this, a);
-	return *this;
-}
 template<class T> Grid<T>& Grid<T>::copyFrom (const Grid<T>& a, bool copyType ) {
 	assertMsg (a.mSize.x == mSize.x && a.mSize.y == mSize.y && a.mSize.z == mSize.z, "different grid resolutions "<<a.mSize<<" vs "<<this->mSize );
 	memcpy(mData, a.mData, sizeof(T) * mSize.x * mSize.y * mSize.z);
@@ -183,7 +178,20 @@ template<class T> Grid<T>& Grid<T>::copyFrom (const Grid<T>& a, bool copyType ) 
 KERNEL(idx) template<class T> void knGridSetConstReal (Grid<T>& me, T val) { me[idx]  = val; }
 KERNEL(idx) template<class T> void knGridAddConstReal (Grid<T>& me, T val) { me[idx] += val; }
 KERNEL(idx) template<class T> void knGridMultConst (Grid<T>& me, T val) { me[idx] *= val; }
-KERNEL(idx) template<class T> void knGridClamp (Grid<T>& me, T min, T max) { me[idx] = clamp( me[idx], min, max); }
+
+KERNEL(idx) template<class T> void knGridSafeDiv (Grid<T>& me, const Grid<T>& other) { me[idx] = safeDivide(me[idx], other[idx]); }
+//KERNEL(idx) template<class T> void gridSafeDiv (Grid<T>& me, const Grid<T>& other) { me[idx] = safeDivide(me[idx], other[idx]); }
+
+KERNEL(idx) template<class T> void knGridClamp(Grid<T>& me, const T& min, const T& max) { me[idx] = clamp(me[idx], min, max); }
+
+template<typename T> inline void stomp(T &v, const T &th) { if(v<th) v=0; }
+template<> inline void stomp<Vec3>(Vec3 &v, const Vec3 &th) { if(v[0]<th[0]) v[0]=0; if(v[1]<th[1]) v[1]=0; if(v[2]<th[2]) v[2]=0; }
+KERNEL(idx) template<class T> void knGridStomp(Grid<T>& me, const T& threshold) { stomp(me[idx], threshold); }
+
+template<class T> Grid<T>& Grid<T>::safeDivide (const Grid<T>& a) {
+	knGridSafeDiv<T> (*this, a);
+	return *this;
+}
 
 template<class T> void Grid<T>::add(const Grid<T>& a) {
 	gridAdd<T,T>(*this, a);
@@ -211,29 +219,8 @@ template<class T> void Grid<T>::mult(const Grid<T>& a) {
 template<class T> void Grid<T>::clamp(Real min, Real max) {
 	knGridClamp<T> (*this, T(min), T(max) );
 }
-
-template<class T> T Grid<T>::getAt(int i, int j, int k) {
-	return mData[index(i,j,k)];
-}
-
-template<class T> void Grid<T>::setAt(int i, int j, int k, T val) {
-	mData[index(i,j,k)] = val;
-}
-
-template<class T> void Grid<T>::copyFromFine(int i, int j, int k,
-	Grid<T> &fine, int sizeX, int sizeY, int sizeZ) {
-	for (int dx = 0; dx < sizeX; dx++)
-		for (int dy = 0; dy < sizeY; dy++)
-			for (int dz = 0; dz < sizeZ; dz++)
-				mData[index(i+dx, j+dy, k+dz)] = fine.getAt(dx, dy, dz);
-}
-
-template<class T> void Grid<T>::copyToFine(int i, int j, int k,
-	Grid<T> &fine, int sizeX, int sizeY, int sizeZ) {
-	for (int dx = 0; dx < sizeX; dx++)
-		for (int dy = 0; dy < sizeY; dy++)
-			for (int dz = 0; dz < sizeZ; dz++)
-				fine.setAt(dx, dy, dz, mData[index(i+dx, j+dy, k+dz)]);
+template<class T> void Grid<T>::stomp(const T& threshold) {
+	knGridStomp<T>(*this, threshold);
 }
 
 template<> Real Grid<Real>::getMax() {
@@ -271,6 +258,54 @@ template<class T> std::string Grid<T>::getDataPointer() {
 	std::ostringstream out;
 	out << mData ;
 	return out.str();
+}
+
+// L1 / L2 functions
+
+//! calculate L1 norm for whole grid with non-parallelized loop
+template<class GRID>
+Real loop_calcL1Grid (const GRID &grid, int bnd)
+{
+	double accu = 0., cnt = 0.;
+	FOR_IJKT_BND(grid, bnd) { accu += norm(grid(i,j,k,t)); }
+	return (Real)accu;
+}
+
+//! calculate L2 norm for whole grid with non-parallelized loop
+// note - kernels "could" be used here, but they can't be templated at the moment (also, that would
+// mean the bnd parameter is fixed)
+template<class GRID>
+Real loop_calcL2Grid(const GRID &grid, int bnd)
+{
+	double accu = 0.;
+	FOR_IJKT_BND(grid, bnd) {
+		accu += normSquare(grid(i,j,k,t)); // supported for real and vec3,4 types
+	}
+	return (Real)sqrt(accu);
+}
+
+//! compute L1 norm of whole grid content (note, not parallel at the moment)
+template<class T> Real Grid<T>::getL1(int bnd) {
+	return loop_calcL1Grid<Grid<T> >(*this, bnd);
+}
+//! compute L2 norm of whole grid content (note, not parallel at the moment)
+template<class T> Real Grid<T>::getL2(int bnd) {
+	return loop_calcL2Grid<Grid<T> >(*this, bnd);
+}
+
+KERNEL(reduce=+) returns(int cnt=0)
+int knCountCells(const FlagGrid& flags, int flag, int bnd, Grid<Real>* mask) { 
+	if(mask) (*mask)(i,j,k) = 0.;
+	if( bnd>0 && (!flags.isInBounds(Vec3i(i,j,k))) ) return;
+	if (flags(i,j,k) & flag ) {
+		cnt++; 
+		if(mask) (*mask)(i,j,k) = 1.;
+	}
+}
+
+//! count number of cells of a certain type flag (can contain multiple bits, checks if any one of them is set - not all!)
+int FlagGrid::countCells(int flag, int bnd, Grid<Real>* mask) {
+	return knCountCells(*this, flag, bnd, mask);
 }
 
 // compute maximal diference of two cells in the grid
@@ -530,15 +565,15 @@ PYTHON() Real getGridAvg(Grid<Real>& source, FlagGrid* flags=NULL)
 
 //! transfer data between real and vec3 grids
 
-KERNEL(idx) void knGetComponent(Grid<Vec3>& source, Grid<Real>& target, int component) { 
+KERNEL(idx) void knGetComponent(const Grid<Vec3>& source, Grid<Real>& target, int component) { 
 	target[idx] = source[idx][component]; 
 }
-PYTHON() void getComponent(Grid<Vec3>& source, Grid<Real>& target, int component) { knGetComponent(source, target, component); }
+PYTHON() void getComponent(const Grid<Vec3>& source, Grid<Real>& target, int component) { knGetComponent(source, target, component); }
 
-KERNEL(idx) void knSetComponent(Grid<Real>& source, Grid<Vec3>& target, int component) { 
+KERNEL(idx) void knSetComponent(const Grid<Real>& source, Grid<Vec3>& target, int component) { 
 	target[idx][component] = source[idx]; 
 }
-PYTHON() void setComponent(Grid<Real>& source, Grid<Vec3>& target, int component) { knSetComponent(source, target, component); }
+PYTHON() void setComponent(const Grid<Real>& source, Grid<Vec3>& target, int component) { knSetComponent(source, target, component); }
 
 //******************************************************************************
 // Specialization classes
@@ -699,7 +734,7 @@ void FlagGrid::initBoundaries(const int &boundaryWidth, const int *types) {
 
 void FlagGrid::updateFromLevelset(LevelsetGrid& levelset) {
 	FOR_IDX(*this) {
-		if (!isObstacle(idx)) {
+		if (!isObstacle(idx) && !isOutflow(idx)) {
 			const Real phi = levelset[idx];
 			if (phi <= levelset.invalidTimeValue()) continue;
 			

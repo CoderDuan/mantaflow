@@ -36,7 +36,7 @@ T* FluidSolver::GridStorage<T>::get(Vec3i size) {
 		debMsg("FluidSolver::GridStorage::get Allocating new "<<size.x<<","<<size.y<<","<<size.z<<" ",3); 
 		grids.push_back( new T[(long long)(size.x) * size.y * size.z] );
 	}
-	if (used > 900)
+	if (used > 200)
 		errMsg("too many temp grids used -- are they released properly ?");
 	return grids[used++];
 }
@@ -107,8 +107,7 @@ template<> void FluidSolver::freeGrid4dPointer<Vec4>(Vec4* ptr) {
 FluidSolver::FluidSolver(Vec3i gridsize, int dim, int fourthDim)
 	: PbClass(this), mDt(1.0), mTimeTotal(0.), mFrame(0), 
 	  mCflCond(1000), mDtMin(1.), mDtMax(1.), mFrameLength(1.),
-	  mGridSize(gridsize),
-	  mDim(dim) , mTimePerFrame(0.), mLockDt(false), mFourthDim(fourthDim)
+	  mGridSize(gridsize), mDim(dim) , mTimePerFrame(0.), mLockDt(false), mFourthDim(fourthDim)
 {
 	if(dim==4 && mFourthDim>0) errMsg("Don't create 4D solvers, use 3D with fourth-dim parameter >0 instead.");
 	assertMsg(dim==2 || dim==3, "Only 2D and 3D solvers allowed.");
@@ -158,11 +157,6 @@ void FluidSolver::step() {
 	updateQtGui(true, mFrame,mTimeTotal, "FluidSolver::step");
 }
 
-//! helper to unify printing from python scripts and printing internal messages (optionally pass debug level to control amount of output)
-PYTHON() void mantaMsg(const std::string& out, int level=1) {
-	debMsg( out, level );
-}
-
 void FluidSolver::printMemInfo() {
 	std::ostringstream msg;
 	msg << "Allocated grids: int " << mGridsInt.used  <<"/"<< mGridsInt.grids.size()  <<", ";
@@ -175,16 +169,6 @@ void FluidSolver::printMemInfo() {
 	msg << "                    vec3 "<< mGrids4dVec.used  <<"/"<< mGrids4dVec.grids.size()  <<". ";
 	msg << "                    vec4 "<< mGrids4dVec4.used <<"/"<< mGrids4dVec4.grids.size() <<". "; }
 	printf("%s\n", msg.str().c_str() );
-}
-
-PYTHON() std::string printBuildInfo() {
-	string infoString = buildInfoString();
-	debMsg( "Build info: "<<infoString.c_str()<<" ",1);
-	return infoString;
-}
-
-PYTHON() void setDebugLevel(int level=1) {
-	gDebugLevel = level; 
 }
 
 //! warning, uses 10^-4 epsilon values, thus only use around "regular" FPS time scales, e.g. 30 frames per time unit
@@ -209,6 +193,34 @@ void FluidSolver::adaptTimestep(Real maxVel)
 
 	// sanity check
 	assertMsg( (mDt > (mDtMin/2.) ) , "Invalid dt encountered! Shouldnt happen..." );
+}
+
+//******************************************************************************
+// Generic helpers (no PYTHON funcs in general.cpp, thus they're here...)
+
+//! helper to unify printing from python scripts and printing internal messages (optionally pass debug level to control amount of output)
+PYTHON() void mantaMsg(const std::string& out, int level=1) {
+	debMsg( out, level );
+}
+
+PYTHON() std::string printBuildInfo() {
+	string infoString = buildInfoString();
+	debMsg( "Build info: "<<infoString.c_str()<<" ",1);
+	return infoString;
+}
+
+//! set debug level for messages (0 off, 1 regular, higher = more, up to 10)
+PYTHON() void setDebugLevel(int level=1) {
+	gDebugLevel = level; 
+}
+
+//! helper function to check for numpy compilation
+PYTHON() void assertNumpy() {
+#if NUMPY==1
+	// all good, nothing to do...
+#else
+	errMsg("This scene requires numpy support. Enable compilation in cmake with \"-DNUMPY=1\" ");
+#endif
 }
 
 } // manta
