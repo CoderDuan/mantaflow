@@ -76,7 +76,7 @@ first_frame = True
 cnt = 450
 total = cnt + 50
 while cnt < total:
-	maxvel = vel.getMaxValue()
+	maxvel = vel.getMax()
 	ms.adaptTimestep( maxvel * 10.0 )
 	mantaMsg('\nFrame %i, time-step size %f, maxVel: %f' % (ms.frame, ms.timestep, maxvel))
 	# global inflow
