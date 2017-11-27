@@ -27,6 +27,17 @@ FluidData::FluidData(FluidSolver* p) {
 	mPressure = (Grid<Real>*)p->create(pt, PbTypeVec(), "");
 }
 
+void FluidData::reset() {
+	// Notice mFlag will not be reset
+	mVel->clear();
+	mDensity->clear();
+	mReact->clear();
+	mFuel->clear();
+	mHeat->clear();
+	mFlame->clear();
+	mPressure->clear();
+}
+
 Vec3i MultiGridSolver::getCoarseSize () {return mCoarseSize;}
 Vec3i MultiGridSolver::getFineSize   () {return mFineSize;}
 Vec3i MultiGridSolver::getFineGridNum() {return mFineGridNum;}
@@ -54,8 +65,11 @@ void MultiGridSolver::setMultiGridSolver(FluidSolver* cs, FluidSolver* fs) {
 	mFineSolver = fs;
 }
 
-void MultiGridSolver::initMultiGrid(int dim, int bWidth) {
+void MultiGridSolver::initMultiGrid(int bWidth) {
 	mGlobalData = FluidData(this);
+	mGlobalData.mFlags->initDomain();
+	mGlobalData.mFlags->fillGrid();
+
 	boundaryWidth = bWidth;
 
 	if (mCoarseSolver == NULL)
@@ -88,6 +102,23 @@ void MultiGridSolver::initMultiGrid(int dim, int bWidth) {
 	printf("FineGridNum:%d*%d*%d\n", mFineGridNum.x, mFineGridNum.y, mFineGridNum.z);
 
 	printf("initMultiGrid() finished.\n");
+}
+
+void MultiGridSolver::resetGrid() {
+	mGlobalData.reset();
+	mCoarseData.reset();
+
+	mCoarseOldVel->clear();
+	mGlobalVel_tmp->clear();
+
+	for (int i = 0; i < mFineGridNum.x; i++) {
+		for (int j = 0; j < mFineGridNum.y; j++) {
+			for (int k = 0; k < mFineGridNum.z; k++) {
+				FluidData &fdata = mFineDataList[fineGridIndex(i,j,k)];
+				fdata.reset();
+			}
+		}
+	}
 }
 
 PbClass* MultiGridSolver::getFlagsObj() {
@@ -240,7 +271,7 @@ template<class T>
 void MultiGridSolver::writeGridData(string filename, Grid<T>* grid) {
 	debMsg( "writing grid to text file " << filename, 1);
 	ofstream ofs(filename.c_str());
-	FOR_IJK_BND(*grid, 1) {
+	FOR_IJK(*grid) {
 		ofs << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";
 	}
 	ofs.close();

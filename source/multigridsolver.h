@@ -24,6 +24,7 @@ struct FluidData
 	Grid<Real>* mPressure;
 	FluidData() {};
 	FluidData(FluidSolver* parent);
+	void reset();
 	// void copyFrom(FluidData from, Vec3i offset, Vec3i size);
 };
 
@@ -33,7 +34,8 @@ public:
 	PYTHON() MultiGridSolver(Vec3i coarseGridSize, Vec3i fineGridSize, Vec3i globalGridSize, int dim=3);
 
 	// init all data grids
-	PYTHON() void initMultiGrid(int dim, int bWidth=0);
+	PYTHON() void initMultiGrid(int bWidth=0);
+	PYTHON() void resetGrid();
 
 	PYTHON() void setMultiGridSolver(FluidSolver* coarseGridSolver, FluidSolver* fineGridSolver);
 
