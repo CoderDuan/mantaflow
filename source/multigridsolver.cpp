@@ -269,7 +269,7 @@ void MultiGridSolver::gatherGlobalData() {
 
 template<class T>
 void MultiGridSolver::writeGridData(string filename, Grid<T>* grid) {
-	debMsg( "writing grid to text file " << filename, 1);
+	// debMsg( "writing grid to text file " << filename, 1);
 	ofstream ofs(filename.c_str());
 	FOR_IJK(*grid) {
 		ofs << (*grid)(i,j,k).x << ' ' << (*grid)(i,j,k).y << ' ' << (*grid)(i,j,k).z <<"\n";

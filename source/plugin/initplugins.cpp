@@ -42,23 +42,6 @@ PYTHON() void densityInflow(const FlagGrid& flags, Grid<Real>& density, WaveletN
 	KnApplyNoiseInfl(flags, density, noise, sdf, scale, sigma);
 }
 
-//! Init noise-modulated density inside shape
-PYTHON() void densityInflowMultiGrid(MultiGridSolver* mgs, int x, int y, int z, WaveletNoiseField& noise, Shape* shape)
-{
-	FlagGrid* flags = mgs->getFineFlagsGrid(x, y, z);
-	Grid<Real> *density = mgs->getFineDensityGrid(x, y, z);
-	Grid<Real> *heat = mgs->getFineHeatGrid(x, y, z);
-	Grid<Real> *fuel = mgs->getFineFuelGrid(x, y, z);
-	Grid<Real> *react = mgs->getFineReactGrid(x, y, z);
-
-	densityInflow(*flags, *density, noise, shape, 1, 0.5);
-	densityInflow(*flags, *heat, noise, shape, 1, 0.5);
-	densityInflow(*flags, *fuel, noise, shape, 1, 0.5);
-	densityInflow(*flags, *react, noise, shape, 1, 0.5);
-
-	return;
-}
-
 //! Apply noise to real grid based on an SDF
 KERNEL() void KnAddNoise(const FlagGrid& flags, Grid<Real>& density, WaveletNoiseField& noise, const Grid<Real>* sdf, Real scale) {
 	if (!flags.isFluid(i,j,k) || (sdf && (*sdf)(i,j,k) > 0.) ) return;
