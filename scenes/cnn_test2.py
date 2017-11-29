@@ -44,15 +44,15 @@ def load_all_data(index):
     truth_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
 
     shape = [GRID_SIZE, GRID_SIZE, VECTOR_DIM]
-    for i in range(index, index+DATA_SIZE):
-        old_coarse_data = load_data("../data/coarse_old" + str(i) + ".txt",shape)
+    for i in range(0, DATA_SIZE):
+        old_coarse_data = load_data("../data/coarse_old" + str(i+index) + ".txt",shape)
         train_coarse_old_data[i] = old_coarse_data#enlarge_data(old_coarse_data, resC, resF)
 
-        new_coarse_data = load_data("../data/coarse"+str(i)+".txt", shape)
+        new_coarse_data = load_data("../data/coarse"+str(i+index)+".txt", shape)
         train_coarse_new_data[i] = new_coarse_data#enlarge_data(new_coarse_data, resC, resF)
 
-        train_global_data[i] = load_data("../data/global"+str(i)+".txt", shape)
-        truth_data[i] = load_data("../data/groundtruth"+str(i)+".txt", shape)
+        train_global_data[i] = load_data("../data/global"+str(i+index)+".txt", shape)
+        truth_data[i] = load_data("../data/groundtruth"+str(i+index)+".txt", shape)
     return train_coarse_old_data, train_coarse_new_data, train_global_data, truth_data
 
 # enlarge the matrix data by resF*resF
