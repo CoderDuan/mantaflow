@@ -22,15 +22,13 @@ resF = 8
 
 SEED = 66478  # Set to None for random seed.
 
-IMAGE_SIZE = resC*resF
-NUM_CHANNELS = 1
-PIXEL_DEPTH = 255
-NUM_LABELS = resC*resF*resC*resF*VECTOR_DIM #10
+GRID_SIZE = resC*resF+2
+NUM_LABELS = GRID_SIZE*GRID_SIZE*VECTOR_DIM #10
 
-DATA_SIZE = 640
+DATA_SIZE = 240
 VALIDATION_SIZE = 20#5000  # Size of the validation set.
-BATCH_SIZE = 16
-NUM_EPOCHS = 5000
+BATCH_SIZE = 10
+NUM_EPOCHS = 3000
 
 tf.app.flags.DEFINE_boolean("self_test", True, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
@@ -40,18 +38,18 @@ def load_data(filename, shape):
     return np.loadtxt(filename).reshape(shape)
 
 def load_all_data(index):
-    train_coarse_old_data = np.ndarray(shape=(DATA_SIZE, resC*resF, resC*resF, VECTOR_DIM), dtype=np.float32)
-    train_coarse_new_data = np.ndarray(shape=(DATA_SIZE, resC*resF, resC*resF, VECTOR_DIM), dtype=np.float32)
-    train_global_data = np.ndarray(shape=(DATA_SIZE, resC*resF, resC*resF, VECTOR_DIM), dtype=np.float32)
-    truth_data = np.ndarray(shape=(DATA_SIZE, resC*resF, resC*resF, VECTOR_DIM), dtype=np.float32)
+    train_coarse_old_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+    train_coarse_new_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+    train_global_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+    truth_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
 
-    shape = [resC*resF, resC*resF, VECTOR_DIM]
+    shape = [GRID_SIZE, GRID_SIZE, VECTOR_DIM]
     for i in range(index, index+DATA_SIZE):
-        old_coarse_data = load_data("../data/coarse_old" + str(i) + ".txt", [resC, resC, VECTOR_DIM])
-        train_coarse_old_data[i] = enlarge_data(old_coarse_data, resC, resF)
+        old_coarse_data = load_data("../data/coarse_old" + str(i) + ".txt",shape)
+        train_coarse_old_data[i] = old_coarse_data#enlarge_data(old_coarse_data, resC, resF)
 
-        new_coarse_data = load_data("../data/coarse"+str(i)+".txt", [resC, resC, VECTOR_DIM])
-        train_coarse_new_data[i] = enlarge_data(new_coarse_data, resC, resF)
+        new_coarse_data = load_data("../data/coarse"+str(i)+".txt", shape)
+        train_coarse_new_data[i] = new_coarse_data#enlarge_data(new_coarse_data, resC, resF)
 
         train_global_data[i] = load_data("../data/global"+str(i)+".txt", shape)
         truth_data[i] = load_data("../data/groundtruth"+str(i)+".txt", shape)
@@ -63,11 +61,11 @@ def enlarge_data(data, resC, resF):
     tmp = np.array(data)
     for i in range(0, resF-1):
         data = np.concatenate((data, tmp), axis=1)
-    data = data.reshape([-1, resC*resF, VECTOR_DIM])
+    data = data.reshape([-1, GRID_SIZE, VECTOR_DIM])
     tmp = np.array(data)
     for i in range(0, resF-1):
         data = np.concatenate((data, tmp), axis=1)
-    data = data.reshape([-1, resC*resF, VECTOR_DIM])
+    data = data.reshape([-1, GRID_SIZE, VECTOR_DIM])
     return data
 
 # We will replicate the model structure for the training subgraph, as well
@@ -122,9 +120,9 @@ def main(argv=None):  # pylint: disable=unused-argument
     # training step using the {feed_dict} argument to the Run() call below.
     train_data_node = tf.placeholder(
         tf.float32,
-        shape=(BATCH_SIZE, resC*resF, resC*resF, VECTOR_DIM*3))
+        shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM*3))
 
-    train_truth_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, resC*resF*resC*resF*VECTOR_DIM))
+    train_truth_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, GRID_SIZE*GRID_SIZE*VECTOR_DIM))
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
     
@@ -135,7 +133,7 @@ def main(argv=None):  # pylint: disable=unused-argument
 
     loss = loss_function(node, train_truth_node)
 
-    learning_rate = 0.00001
+    learning_rate = 0.0001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
     print "optimizer:",optimizer
 
@@ -145,14 +143,14 @@ def main(argv=None):  # pylint: disable=unused-argument
         tf.initialize_all_variables().run()
         print 'Initialized!'
         # Loop through training steps.
-        for index in xrange(0, 36):
+        for index in xrange(0, 24):
             # get data
             train_coarse_old_data, train_coarse_new_data, train_global_data, train_truth_data = load_all_data(index*DATA_SIZE)
-
+            print 'data loaded! Index:', index * DATA_SIZE
             train_data = np.concatenate((train_global_data, train_coarse_new_data), axis=3)
             train_data = np.concatenate((train_data, train_coarse_old_data), axis=3)
             # train_truth_data = truth_data[VALIDATION_SIZE:,:,:,:]
-            train_truth_data = train_truth_data.reshape([-1, resC*resF*resC*resF*VECTOR_DIM])                       
+            train_truth_data = train_truth_data.reshape([-1, GRID_SIZE*GRID_SIZE*VECTOR_DIM])                       
             train_size = train_truth_data.shape[0]
 
             for step in xrange(int(num_epochs * train_size / BATCH_SIZE)):
@@ -174,7 +172,7 @@ def main(argv=None):  # pylint: disable=unused-argument
                     sys.stdout.flush()
 
                 # save the model
-                if int(step) % 20000 == 0:
+                if int(step) % 2400 == 0:
                     saver = tf.train.Saver()
                     path = saver.save(s, './save/cnn_test_model',
                         global_step=int(step+index*DATA_SIZE))

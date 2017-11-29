@@ -79,7 +79,10 @@ void MultiGridSolver::initMultiGrid(int bWidth) {
 	mCoarseData.mFlags->fillGrid();
 	PbType pt;
 	pt.S = "MACGrid";
+
 	mCoarseOldVel = (MACGrid*)mCoarseSolver->create(pt, PbTypeVec(), "");
+	mCoarseOldVel_Enlarged = (MACGrid*)create(pt, PbTypeVec(), "");
+	mCoarseNewVel_Enlarged = (MACGrid*)create(pt, PbTypeVec(), "");
 	mGlobalVel_tmp = (MACGrid*)create(pt, PbTypeVec(), "");
 
 	if (mFineSolver == NULL)
@@ -252,6 +255,8 @@ void MultiGridSolver::mapCoarseDataToFineGrid() {
 
 void MultiGridSolver::gatherGlobalData() {
 	//printf("%s\n", __func__);
+	mCoarseOldVel_Enlarged->copyFrom(*(mCoarseNewVel_Enlarged));
+
 	Vec3i offset = Vec3i(1,1,1);
 	if (!is3D()) offset.z = 0;
 	for (int idx = 0; idx < mFineGridNum.x; idx++) {
@@ -259,9 +264,18 @@ void MultiGridSolver::gatherGlobalData() {
 			for (int idz = 0; idz < mFineGridNum.z; idz++) {
 				Vec3i pos = Vec3i(idx, idy, idz) * mFineSizeEffective + offset;
 				FluidData &fdata = mFineDataList[fineGridIndex(idx,idy,idz)];
-				// mGlobalData.mVel->copyFromFine(pos, *(fdata.mVel), mFineSize);
-				// mGlobalData.mPressure->copyFromFine(pos, *(fdata.mPressure), mFineSize);
 				mGlobalVel_tmp->copyFromFine(pos, *(fdata.mVel), mFineSize);
+
+				// calculate enlarged coarse vel data
+				for (int i = 0; i < mFineSize.x; i++) {
+					for (int j = 0; j < mFineSize.y; j++) {
+						for (int k = 0; k < mFineSize.z; k++) {
+							auto coarseVel = mCoarseData.mVel->getAt(idx, idy, idz);
+							mCoarseNewVel_Enlarged->setAt(pos.x+i, pos.y+j, pos.z+k,
+														  coarseVel);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -281,8 +295,8 @@ void MultiGridSolver::writeFluidData(string filename) {
 	string global_filename = "data/global" + filename + ".txt";
 
 	writeGridData("data/global" + filename + ".txt", mGlobalVel_tmp);
-	writeGridData("data/coarse" + filename + ".txt", mCoarseData.mVel);
-	writeGridData("data/coarse_old" + filename + ".txt", mCoarseOldVel);
+	writeGridData("data/coarse" + filename + ".txt", mCoarseNewVel_Enlarged);
+	writeGridData("data/coarse_old" + filename + ".txt", mCoarseOldVel_Enlarged);
 	writeGridData("data/groundtruth" + filename + ".txt", mGlobalData.mVel);
 
 }

@@ -119,6 +119,8 @@ protected:
 	FluidData mCoarseData;
 
 	MACGrid* mCoarseOldVel;
+	MACGrid* mCoarseOldVel_Enlarged;
+	MACGrid* mCoarseNewVel_Enlarged;
 	MACGrid* mGlobalVel_tmp;
 
 	vector<FluidData> mFineDataList;
