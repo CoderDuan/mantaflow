@@ -67,6 +67,9 @@ public:
 	PYTHON() PbClass* getFlameObj();
 	PYTHON() PbClass* getPressureObj();
 
+	PYTHON() void copyToArray_CoarseVel(PyArrayContainer oldVel,
+										PyArrayContainer newVel);
+
 	PYTHON() void writeFluidData(string filename);
 	template<class T> void writeGridData(string filename, Grid<T>* grid);
 
