@@ -27,7 +27,7 @@ NUM_LABELS = GRID_SIZE*GRID_SIZE*VECTOR_DIM #10
 
 DATA_SIZE = 240
 VALIDATION_SIZE = 20#5000  # Size of the validation set.
-BATCH_SIZE = 10
+BATCH_SIZE = 1
 NUM_EPOCHS = 3000
 
 tf.app.flags.DEFINE_boolean("self_test", True, "True if running a self test.")
@@ -133,7 +133,7 @@ def main(argv=None):  # pylint: disable=unused-argument
 
     loss = loss_function(node, train_truth_node)
 
-    learning_rate = 0.0001
+    learning_rate = 0.00001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
     print "optimizer:",optimizer
 
@@ -172,10 +172,10 @@ def main(argv=None):  # pylint: disable=unused-argument
                     sys.stdout.flush()
 
                 # save the model
-                if int(step) % 2400 == 0:
+                if int(step+1) % 2400 == 0:
                     saver = tf.train.Saver()
                     path = saver.save(s, './save/cnn_test_model',
-                        global_step=int(step+index*DATA_SIZE))
+                        global_step=int(step+index*DATA_SIZE+1))
                     print 'Saving result to ' + path
 
 if __name__ == '__main__':
