@@ -98,6 +98,7 @@ def model(data, train=False):
                         strides=[1, 1, 1, 1],
                         padding='SAME')
     conv_shape = conv.get_shape().as_list()
+    print conv
     reshape = tf.reshape(
         conv,
         [conv_shape[0], conv_shape[1] * conv_shape[2] * conv_shape[3]])
@@ -108,6 +109,7 @@ def model(data, train=False):
 def loss_function(model, truth):
     truth = tf.reshape(truth, [BATCH_SIZE, NUM_LABELS])
     loss = tf.reduce_sum(tf.abs(model - truth)) / tf.reduce_sum(tf.abs(truth))
+    print loss
     return loss
 
 def loss_function2(model, truth):
@@ -126,6 +128,7 @@ def main(argv=None):  # pylint: disable=unused-argument
         shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM*3))
     print train_data_node
     train_truth_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, GRID_SIZE*GRID_SIZE*VECTOR_DIM))
+    print "train_truth_node:", train_truth_node
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
     

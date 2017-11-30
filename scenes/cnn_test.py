@@ -97,6 +97,7 @@ def model(data, train=False):
                         conv2_weights,
                         strides=[1, 1, 1, 1],
                         padding='SAME')
+    print conv
     conv_shape = conv.get_shape().as_list()
     reshape = tf.reshape(
         conv,

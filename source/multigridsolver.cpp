@@ -272,6 +272,8 @@ void MultiGridSolver::gatherGlobalData() {
 			for (int idz = 0; idz < mFineGridNum.z; idz++) {
 				Vec3i pos = Vec3i(idx, idy, idz) * mFineSizeEffective + offset;
 				FluidData &fdata = mFineDataList[fineGridIndex(idx,idy,idz)];
+				mGlobalData.mVel->copyFromFine(pos, *(fdata.mVel), mFineSize);
+				mGlobalData.mPressure->copyFromFine(pos, *(fdata.mPressure), mFineSize);
 				mGlobalVel_tmp->copyFromFine(pos, *(fdata.mVel), mFineSize);
 
 				// calculate enlarged coarse vel data
@@ -287,6 +289,7 @@ void MultiGridSolver::gatherGlobalData() {
 			}
 		}
 	}
+
 }
 
 template<class T>
