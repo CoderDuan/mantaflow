@@ -2,6 +2,7 @@
 #include "grid.h"
 #include <sstream>
 #include <fstream>
+// #include "plugin/numpyconvert.cpp"
 
 using namespace std;
 namespace Manta {
@@ -158,6 +159,13 @@ PbClass* MultiGridSolver::getPressureObj() {
 
 PbClass* MultiGridSolver::getFineFlagsGridObj(int i, int j, int k) {
 	return (PbClass*)mFineDataList[fineGridIndex(i,j,k)].mFlags;
+}
+
+extern void copyGridToArrayMAC(const MACGrid& _Source, PyArrayContainer target);
+void MultiGridSolver::copyToArray_CoarseVel(PyArrayContainer oldVel,
+											PyArrayContainer newVel) {
+	copyGridToArrayMAC(*mCoarseOldVel_Enlarged, oldVel);
+	copyGridToArrayMAC(*mCoarseNewVel_Enlarged, newVel);
 }
 
 void MultiGridSolver::mapDataToFineGrid() {

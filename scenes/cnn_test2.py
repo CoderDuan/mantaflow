@@ -83,6 +83,8 @@ def model(data, train=False):
         tf.truncated_normal([5, 5, 32, 3],
                             stddev=0.1,
                             seed=SEED))
+    print conv1_weights
+    print conv2_weights
     # 2D convolution, with 'SAME' padding (i.e. the output feature map has
     # the same size as the input). Note that {strides} is a 4D array whose
     # shape matches the data layout: [image index, y, x, depth].
@@ -100,6 +102,7 @@ def model(data, train=False):
         conv,
         [conv_shape[0], conv_shape[1] * conv_shape[2] * conv_shape[3]])
 
+    print reshape
     return reshape
 
 def loss_function(model, truth):
@@ -121,7 +124,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     train_data_node = tf.placeholder(
         tf.float32,
         shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM*3))
-
+    print train_data_node
     train_truth_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, GRID_SIZE*GRID_SIZE*VECTOR_DIM))
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
@@ -136,7 +139,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     learning_rate = 0.00001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
     print "optimizer:",optimizer
-
+    return
     # Create a local session to run this computation.
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.

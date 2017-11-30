@@ -2,14 +2,20 @@ import tensorflow as tf
 import numpy as np
 from manta import *
 
+BATCH_SIZE = 1
+VECTOR_DIM = 3
+
 dim = 2
 # resolution
-resC = 6
-resF = 6
+resC = 8
+resF = 8
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
 gsG = vec3(resC*resF+2, resC*resF+2, resC*resF+2)
+
+GRID_SIZE = resC*resF+2
+
 # buoyancy parameters
 smokeDensity = -0.001 # alpha
 smokeTempDiff = 0.1   # beta
@@ -24,7 +30,7 @@ ms = MultiGridSolver(name='MultiGridSolver',
 csolver = Solver(name='CoarseSolver', gridSize=gsC, dim=dim)
 fsolver = Solver(name='FineSolver', gridSize=gsF, dim=dim)
 ms.setMultiGridSolver(csolver, fsolver);
-ms.initMultiGrid(dim=dim, bWidth=bWidth)
+ms.initMultiGrid(bWidth=bWidth)
 
 doOpen = True
 
@@ -73,22 +79,57 @@ if (GUI):
 	gui = Gui()
 	gui.show(True)
 
-train_data_node = tf.placeholder(
-    tf.float32,
-    shape=(BATCH_SIZE, resC*resF, resC*resF, VECTOR_DIM*3))
-
-train_truth_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, resC*resF*resC*resF*VECTOR_DIM))
-
-saver = tf.train.Saver()
-
-
-
 first_frame = True
 cnt = 450
 total = cnt + 50
 
+# def model(data, train=False):
+#     """The Model definition."""
+#     # The variables below hold all the trainable weights. They are passed an
+#     # initial value which will be assigned when when we call:
+#     # {tf.initialize_all_variables().run()}
+#     conv1_weights = tf.Variable(
+#         tf.truncated_normal([5, 5, VECTOR_DIM*3, 32],  # 5x5 filter, depth 32.
+#                             stddev=0.1,
+#                             seed=SEED))
+#     conv2_weights = tf.Variable(
+#         tf.truncated_normal([5, 5, 32, 3],
+#                             stddev=0.1,
+#                             seed=SEED))
+#     # 2D convolution, with 'SAME' padding (i.e. the output feature map has
+#     # the same size as the input). Note that {strides} is a 4D array whose
+#     # shape matches the data layout: [image index, y, x, depth].
+#     conv = tf.nn.conv2d(data,
+#                         conv1_weights,
+#                         strides=[1, 1, 1, 1],
+#                         padding='SAME')
+#     # conv = tf.nn.dropout(conv, 0.95, seed=SEED)
+#     conv = tf.nn.conv2d(conv,
+#                         conv2_weights,
+#                         strides=[1, 1, 1, 1],
+#                         padding='SAME')
+#     conv_shape = conv.get_shape().as_list()
+#     reshape = tf.reshape(
+#         conv,
+#         [conv_shape[0], conv_shape[1] * conv_shape[2] * conv_shape[3]])
+
+#     print reshape
+#     return reshape
+
 with tf.Session() as sess:
-	saver.restore(sess, "./save/cnn_test_model")
+	mantaMsg('Loading model...')
+
+	saver = tf.train.import_meta_graph('scenes/save/cnn_test_model-77520.meta')
+	saver.restore(sess, tf.train.latest_checkpoint('scenes/save/'))
+	graph = tf.get_default_graph()
+	predict_op = graph.get_tensor_by_name('Reshape:0')
+	data_node = graph.get_tensor_by_name('Placeholder:0')
+
+	mantaMsg('Model loaded!')
+	globalVel = np.ndarray(shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+	coarseOldVel = np.ndarray(shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+	coarseNewVel = np.ndarray(shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+
 	while cnt < total:
 		maxvel = vel.getMax()
 		ms.adaptTimestep( maxvel * 10.0 )
@@ -136,15 +177,17 @@ with tf.Session() as sess:
 		# solve pressure coarse
 		solvePressureCoarseGrid(ms)
 
+		ms.copyToArray_CoarseVel(coarseOldVel, coarseNewVel)
+		copyGridToArrayMAC(vel, globalVel)
+
+		data = np.concatenate((globalVel, coarseNewVel), axis=3)
+		data = np.concatenate((data, coarseOldVel), axis=3)
+
+		print (sess.run(predict_op, feed_dict={data_node:data}))
+
 		solvePressure( flags=flags, vel=vel, pressure=pressure )
 
 		ms.gatherGlobalData()
-		# if (first_frame):
-		# 	first_frame = False
-		# else:
-		# 	ms.writeFluidData(str(cnt))
-		# 	print ("cnt:", cnt)
-		# 	cnt = cnt + 1
 
 		# copy to global
 		# ms.mapCoarseDataToFineGrid()
