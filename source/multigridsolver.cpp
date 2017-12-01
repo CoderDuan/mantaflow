@@ -277,9 +277,9 @@ void MultiGridSolver::gatherGlobalData() {
 				mGlobalVel_tmp->copyFromFine(pos, *(fdata.mVel), mFineSize);
 
 				// calculate enlarged coarse vel data
-				for (int i = 0; i < mFineSize.x; i++) {
-					for (int j = 0; j < mFineSize.y; j++) {
-						for (int k = 0; k < mFineSize.z; k++) {
+				for (int i = 0; i < mFineSizeEffective.x; i++) {
+					for (int j = 0; j < mFineSizeEffective.y; j++) {
+						for (int k = 0; k < mFineSizeEffective.z; k++) {
 							auto coarseVel = mCoarseData.mVel->getAt(idx, idy, idz);
 							mCoarseNewVel_Enlarged->setAt(pos.x+i, pos.y+j, pos.z+k,
 														  coarseVel);

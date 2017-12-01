@@ -1,5 +1,3 @@
-import tensorflow as tf
-import numpy as np
 from manta import *
 
 BATCH_SIZE = 1
@@ -70,10 +68,10 @@ react   = ms.getReactObj()
 flame   = ms.getFlameObj()
 pressure = ms.getPressureObj()
 
-flags.initDomain( boundaryWidth=bWidth )
-flags.fillGrid()
-if doOpen:
-	setOpenBound( flags, bWidth, 'xXyYzZ', FlagOutflow | FlagEmpty )
+# flags.initDomain( boundaryWidth=bWidth )
+# flags.fillGrid()
+# if doOpen:
+# 	setOpenBound( flags, bWidth, 'xXyYzZ', FlagOutflow | FlagEmpty )
 
 if (GUI):
 	gui = Gui()
@@ -83,79 +81,58 @@ first_frame = True
 cnt = 0
 total = cnt + 100
 
-with tf.Session() as sess:
-	# mantaMsg('Loading model...')
+while cnt < total:
+	cnt = cnt + 1
+	maxvel = vel.getMax()
+	ms.adaptTimestep( maxvel )
+	mantaMsg('\nFrame %i, time-step size %f, maxVel: %f' % (ms.frame, ms.timestep, maxvel))
+	# global inflow
+	if ms.timeTotal < 250:
+		densityInflow(flags=flags, density=density, noise=noise, shape=sourceBox,
+			scale=1, sigma=0.5)
+		densityInflow(flags=flags, density=heat, noise=noise, shape=sourceBox,
+			scale=1, sigma=0.5)
+		densityInflow(flags=flags, density=fuel, noise=noise, shape=sourceBox,
+			scale=1, sigma=0.5)
+		densityInflow(flags=flags, density=react, noise=noise, shape=sourceBox,
+			scale=1, sigma=0.5)
+	# global process burn
+	processBurn(fuel=fuel, density=density, react=react, heat=heat)
+	# global advectSL
+	advectSemiLagrange(flags=flags, vel=vel, grid=density, order=2)
+	advectSemiLagrange(flags=flags, vel=vel, grid=heat,    order=2)
+	advectSemiLagrange(flags=flags, vel=vel, grid=fuel,    order=2)
+	advectSemiLagrange(flags=flags, vel=vel, grid=react,   order=2)
+	advectSemiLagrange(flags=flags, vel=vel, grid=vel,     order=2,
+		openBounds=doOpen, boundaryWidth=bWidth)
 
-	# saver = tf.train.import_meta_graph('scenes/save/cnn_test_model-396960.meta')
-	# saver.restore(sess, tf.train.latest_checkpoint('scenes/save/'))
-	# graph = tf.get_default_graph()
-	# predict_op = graph.get_tensor_by_name('Conv2D_1:0')
-	# data_node = graph.get_tensor_by_name('Placeholder:0')
-	# truth_node = graph.get_tensor_by_name('Placeholder_1:0')
-	# loss_op = graph.get_tensor_by_name('div:0')
+	# global reset outflow
+	if doOpen:
+		resetOutflow(flags=flags, real=density)
+		#resetOutflowCoarseGrid(ms)
+		#resetOutflowFineGrid(ms)
 
-	# mantaMsg('Model loaded!')
-	# globalVel = np.ndarray(shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
-	# coarseOldVel = np.ndarray(shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
-	# coarseNewVel = np.ndarray(shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+	# global add buoyancy
+	addBuoyancy(flags=flags, density=density, vel=vel, gravity=(gravity*smokeDensity))
+	addBuoyancy(flags=flags, density=heat,    vel=vel, gravity=(gravity*smokeTempDiff))
 
-	while cnt < total:
-		cnt = cnt + 1
-		maxvel = vel.getMax()
-		ms.adaptTimestep( maxvel * 10.0 )
-		mantaMsg('\nFrame %i, time-step size %f, maxVel: %f' % (ms.frame, ms.timestep, maxvel))
-		# global inflow
-		if ms.timeTotal < 250:
-			densityInflow(flags=flags, density=density, noise=noise, shape=sourceBox,
-				scale=1, sigma=0.5)
-			densityInflow(flags=flags, density=heat, noise=noise, shape=sourceBox,
-				scale=1, sigma=0.5)
-			densityInflow(flags=flags, density=fuel, noise=noise, shape=sourceBox,
-				scale=1, sigma=0.5)
-			densityInflow(flags=flags, density=react, noise=noise, shape=sourceBox,
-				scale=1, sigma=0.5)
-		# mantaMsg('1')
-		# global process burn
-		processBurn(fuel=fuel, density=density, react=react, heat=heat)
-		# global advectSL
-		advectSemiLagrange(flags=flags, vel=vel, grid=density, order=2)
-		advectSemiLagrange(flags=flags, vel=vel, grid=heat,    order=2)
-		advectSemiLagrange(flags=flags, vel=vel, grid=fuel,    order=2)
-		advectSemiLagrange(flags=flags, vel=vel, grid=react,   order=2)
-		advectSemiLagrange(flags=flags, vel=vel, grid=vel,     order=2,
-			openBounds=doOpen, boundaryWidth=bWidth)
+	# global copy to fine
+	ms.mapDataToFineGrid()
 
-		# global reset outflow
-		if doOpen:
-			resetOutflow(flags=flags, real=density)
-			#resetOutflowCoarseGrid(ms)
-			#resetOutflowFineGrid(ms)
+	# global copy to coarse
+	ms.mapDataToCoarseGrid()
 
-		# global add buoyancy
-		addBuoyancy(flags=flags, density=density, vel=vel, gravity=(gravity*smokeDensity))
-		addBuoyancy(flags=flags, density=heat,    vel=vel, gravity=(gravity*smokeTempDiff))
+	# solve pressure fine
+	solvePressureFineGrid(ms)
 
-		# global copy to fine
-		ms.mapDataToFineGrid()
+	# solve pressure coarse
+	solvePressureCoarseGrid(ms)
 
-		# global copy to coarse
-		ms.mapDataToCoarseGrid()
+	# copy to global
+	ms.mapCoarseDataToFineGrid()
+	ms.gatherGlobalData()
 
-		# solve pressure fine
-		solvePressureFineGrid(ms)
+	updateFlame( react=react, flame=flame )
 
-		# solve pressure coarse
-		solvePressureCoarseGrid(ms)
-
-		# ms.gatherGlobalData()
-
-		# solvePressure( flags=flags, vel=vel, pressure=pressure )
-		
-		# copy to global
-		ms.mapCoarseDataToFineGrid()
-		ms.gatherGlobalData()
-
-		updateFlame( react=react, flame=flame )
-
-		# timings.display()
-		ms.step()
+	# timings.display()
+	ms.step()
