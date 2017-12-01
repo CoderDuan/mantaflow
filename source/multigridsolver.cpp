@@ -203,7 +203,6 @@ void MultiGridSolver::mapDataToFineGrid() {
 
 void MultiGridSolver::mapDataToCoarseGrid() {
 	//printf("%s\n", __func__);
-	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
 	for (int i = 0; i < mFineGridNum.x; i++) {
 		for (int j = 0; j < mFineGridNum.y; j++) {
 			for (int k = 0; k < mFineGridNum.z; k++) {
@@ -214,6 +213,7 @@ void MultiGridSolver::mapDataToCoarseGrid() {
 			}
 		}
 	}
+	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
 }
 
 std::pair<Vec3, float> MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
