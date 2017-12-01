@@ -7,8 +7,8 @@ VECTOR_DIM = 3
 
 dim = 2
 # resolution
-resC = 6
-resF = 6
+resC = 8
+resF = 8
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
