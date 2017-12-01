@@ -203,7 +203,6 @@ void MultiGridSolver::mapDataToFineGrid() {
 
 void MultiGridSolver::mapDataToCoarseGrid() {
 	//printf("%s\n", __func__);
-	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
 	for (int i = 0; i < mFineGridNum.x; i++) {
 		for (int j = 0; j < mFineGridNum.y; j++) {
 			for (int k = 0; k < mFineGridNum.z; k++) {
@@ -214,6 +213,7 @@ void MultiGridSolver::mapDataToCoarseGrid() {
 			}
 		}
 	}
+	mCoarseOldVel->copyFrom(*(mCoarseData.mVel));
 }
 
 std::pair<Vec3, float> MultiGridSolver::calculateCoarseCell(int i, int j, int k) {
@@ -277,9 +277,9 @@ void MultiGridSolver::gatherGlobalData() {
 				mGlobalVel_tmp->copyFromFine(pos, *(fdata.mVel), mFineSize);
 
 				// calculate enlarged coarse vel data
-				for (int i = 0; i < mFineSize.x; i++) {
-					for (int j = 0; j < mFineSize.y; j++) {
-						for (int k = 0; k < mFineSize.z; k++) {
+				for (int i = 0; i < mFineSizeEffective.x; i++) {
+					for (int j = 0; j < mFineSizeEffective.y; j++) {
+						for (int k = 0; k < mFineSizeEffective.z; k++) {
 							auto coarseVel = mCoarseData.mVel->getAt(idx, idy, idz);
 							mCoarseNewVel_Enlarged->setAt(pos.x+i, pos.y+j, pos.z+k,
 														  coarseVel);
