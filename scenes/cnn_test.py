@@ -17,20 +17,20 @@ import tensorflow as tf
 dim = 2
 VECTOR_DIM = 3
 # resolution
-resC = 6
-resF = 6
+resC = 8
+resF = 4
 
 SEED = 66478  # Set to None for random seed.
 
-IMAGE_SIZE = resC*resF
+GRID_SIZE = resC*resF+2
 NUM_CHANNELS = 1
 PIXEL_DEPTH = 255
-NUM_LABELS = resC*resF*resC*resF*VECTOR_DIM #10
+NUM_LABELS = GRID_SIZE*GRID_SIZE*VECTOR_DIM #10
 
-DATA_SIZE = 500
-VALIDATION_SIZE = 20#5000  # Size of the validation set.
-BATCH_SIZE = 10
-NUM_EPOCHS = 100000
+DATA_SIZE = 100
+VALIDATION_SIZE = 0#5000  # Size of the validation set.
+BATCH_SIZE = 1
+NUM_EPOCHS = 3000
 
 tf.app.flags.DEFINE_boolean("self_test", True, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
@@ -40,18 +40,18 @@ def load_data(filename, shape):
     return np.loadtxt(filename).reshape(shape)
 
 def load_all_data():
-    train_coarse_old_data = np.ndarray(shape=(DATA_SIZE, resC*resF, resC*resF, VECTOR_DIM), dtype=np.float32)
-    train_coarse_new_data = np.ndarray(shape=(DATA_SIZE, resC*resF, resC*resF, VECTOR_DIM), dtype=np.float32)
-    train_global_data = np.ndarray(shape=(DATA_SIZE, resC*resF, resC*resF, VECTOR_DIM), dtype=np.float32)
-    truth_data = np.ndarray(shape=(DATA_SIZE, resC*resF, resC*resF, VECTOR_DIM), dtype=np.float32)
+    train_coarse_old_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+    train_coarse_new_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+    train_global_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+    truth_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
 
-    shape = [resC*resF, resC*resF, VECTOR_DIM]
+    shape = [GRID_SIZE, GRID_SIZE, VECTOR_DIM]
     for i in range(0, DATA_SIZE):
-        old_coarse_data = load_data("../data/coarse_old" + str(i) + ".txt", [resC, resC, VECTOR_DIM])
-        train_coarse_old_data[i] = enlarge_data(old_coarse_data, resC, resF)
+        old_coarse_data = load_data("../data/coarse_old" + str(i) + ".txt", shape)
+        train_coarse_old_data[i] = old_coarse_data#(old_coarse_data, resC, resF)
 
-        new_coarse_data = load_data("../data/coarse"+str(i)+".txt", [resC, resC, VECTOR_DIM])
-        train_coarse_new_data[i] = enlarge_data(new_coarse_data, resC, resF)
+        new_coarse_data = load_data("../data/coarse"+str(i)+".txt", shape)
+        train_coarse_new_data[i] = new_coarse_data#(new_coarse_data, resC, resF)
 
         train_global_data[i] = load_data("../data/global"+str(i)+".txt", shape)
         truth_data[i] = load_data("../data/groundtruth"+str(i)+".txt", shape)
@@ -98,16 +98,13 @@ def model(data, train=False):
                         strides=[1, 1, 1, 1],
                         padding='SAME')
     print conv
-    conv_shape = conv.get_shape().as_list()
-    reshape = tf.reshape(
-        conv,
-        [conv_shape[0], conv_shape[1] * conv_shape[2] * conv_shape[3]])
 
-    return reshape
+    return conv
 
 def loss_function(model, truth):
-    truth = tf.reshape(truth, [BATCH_SIZE, NUM_LABELS])
-    loss = tf.reduce_sum(tf.abs(model - truth)) / tf.reduce_sum(tf.abs(truth))
+    # model = tf.reshape(model, [BATCH_SIZE, NUM_LABELS])
+    # truth = tf.reshape(truth, [BATCH_SIZE, NUM_LABELS])
+    loss = tf.reduce_mean(tf.div(tf.abs(model - truth), (tf.abs(truth) + 0.001)))
     return loss
 
 def loss_function2(model, truth):
@@ -125,7 +122,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     train_data = np.concatenate((train_global_data, train_coarse_new_data), axis=3)
     train_data = np.concatenate((train_data, train_coarse_old_data), axis=3)
     train_truth_data = truth_data[VALIDATION_SIZE:,:,:,:]
-    train_truth_data = train_truth_data.reshape([-1, resC*resF*resC*resF*VECTOR_DIM])
+    # train_truth_data = train_truth_data.reshape([-1, resC*resF, resC*resF, VECTOR_DIM])
 
     validation_old_data = coarse_old_data[:VALIDATION_SIZE,:,:,:]
     validation_new_data = coarse_new_data[:VALIDATION_SIZE,:,:,:]
@@ -144,11 +141,11 @@ def main(argv=None):  # pylint: disable=unused-argument
     # training step using the {feed_dict} argument to the Run() call below.
     train_data_node = tf.placeholder(
         tf.float32,
-        shape=(BATCH_SIZE, resC*resF, resC*resF, VECTOR_DIM*3))
+        shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM*3))
     # train_truth_node = tf.placeholder(tf.float32,
     #                                    shape=(BATCH_SIZE, NUM_LABELS))
 
-    train_truth_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, resC*resF*resC*resF*VECTOR_DIM))
+    train_truth_node = tf.placeholder(tf.float32, shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
     # For the validation and test data, we'll just hold the entire dataset in
     # one constant node.
     validation_data_node = tf.constant(validation_data)
@@ -175,7 +172,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # Note that we could use better randomization across epochs.
             offset = (step * BATCH_SIZE) % (train_size - BATCH_SIZE)
             batch_data = train_data[offset:(offset + BATCH_SIZE), :, :, :]
-            batch_labels = train_truth_data[offset:(offset + BATCH_SIZE)]
+            batch_labels = train_truth_data[offset:(offset + BATCH_SIZE), :, :, :]
             # This dictionary maps the batch data (as a numpy array) to the
             # node in the graph is should be fed to.
             feed_dict = {train_data_node: batch_data,
@@ -191,7 +188,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # save the model
             if int(step+1) % 2000 == 0:
                 saver = tf.train.Saver()
-        	path = saver.save(s, './save/cnn_test_model', global_step=int(step))
+        	path = saver.save(s, './save/cnn_test_model')
 		print 'Saving result to ' + path
 
 if __name__ == '__main__':

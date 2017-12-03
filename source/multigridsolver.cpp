@@ -263,8 +263,6 @@ void MultiGridSolver::mapCoarseDataToFineGrid() {
 
 void MultiGridSolver::gatherGlobalData() {
 	//printf("%s\n", __func__);
-	mCoarseOldVel_Enlarged->copyFrom(*(mCoarseNewVel_Enlarged));
-
 	Vec3i offset = Vec3i(1,1,1);
 	if (!is3D()) offset.z = 0;
 	for (int idx = 0; idx < mFineGridNum.x; idx++) {
@@ -274,22 +272,38 @@ void MultiGridSolver::gatherGlobalData() {
 				FluidData &fdata = mFineDataList[fineGridIndex(idx,idy,idz)];
 				mGlobalData.mVel->copyFromFine(pos, *(fdata.mVel), mFineSize);
 				mGlobalData.mPressure->copyFromFine(pos, *(fdata.mPressure), mFineSize);
+			}
+		}
+	}
+}
+
+// gather mGlobalVel_tmp(fine data) and coarse vel data(old and new, enlarged)
+void MultiGridSolver::gatherTrainData() {
+	Vec3i offset = Vec3i(1,1,1);
+	if (!is3D()) offset.z = 0;
+	for (int idx = 0; idx < mFineGridNum.x; idx++) {
+		for (int idy = 0; idy < mFineGridNum.y; idy++) {
+			for (int idz = 0; idz < mFineGridNum.z; idz++) {
+				Vec3i pos = Vec3i(idx, idy, idz) * mFineSizeEffective + offset;
+				FluidData &fdata = mFineDataList[fineGridIndex(idx,idy,idz)];
 				mGlobalVel_tmp->copyFromFine(pos, *(fdata.mVel), mFineSize);
 
 				// calculate enlarged coarse vel data
 				for (int i = 0; i < mFineSizeEffective.x; i++) {
 					for (int j = 0; j < mFineSizeEffective.y; j++) {
 						for (int k = 0; k < mFineSizeEffective.z; k++) {
-							auto coarseVel = mCoarseData.mVel->getAt(idx, idy, idz);
+							auto coarseOldVel = mCoarseOldVel->getAt(idx, idy, idz);
+							mCoarseOldVel_Enlarged->setAt(pos.x+i, pos.y+j, pos.z+k,
+														  coarseOldVel);
+							auto coarseNewVel = mCoarseData.mVel->getAt(idx, idy, idz);
 							mCoarseNewVel_Enlarged->setAt(pos.x+i, pos.y+j, pos.z+k,
-														  coarseVel);
+														  coarseNewVel);
 						}
 					}
 				}
 			}
 		}
 	}
-
 }
 
 template<class T>

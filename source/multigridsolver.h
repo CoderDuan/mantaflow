@@ -57,6 +57,7 @@ public:
 	// gather global data from fine grid for rendering
 	PYTHON() void mapCoarseDataToFineGrid();
 	PYTHON() void gatherGlobalData();
+	PYTHON() void gatherTrainData();
 
 	PYTHON() PbClass* getFlagsObj();
 	PYTHON() PbClass* getVelObj();
@@ -122,9 +123,9 @@ protected:
 	FluidData mCoarseData;
 
 	MACGrid* mCoarseOldVel;
-	MACGrid* mCoarseOldVel_Enlarged;
-	MACGrid* mCoarseNewVel_Enlarged;
-	MACGrid* mGlobalVel_tmp;
+	MACGrid* mCoarseOldVel_Enlarged; // coarse vel of last frame enlarged to the same size of global data
+	MACGrid* mCoarseNewVel_Enlarged; // coarse vel of current frame enlarged to the same size of global data
+	MACGrid* mGlobalVel_tmp; // Global Data copied from each fine grid
 
 	vector<FluidData> mFineDataList;
 
