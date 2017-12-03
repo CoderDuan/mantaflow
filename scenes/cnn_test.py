@@ -97,7 +97,7 @@ def model(data, train=False):
                         conv2_weights,
                         strides=[1, 1, 1, 1],
                         padding='SAME')
-    print conv
+    print "model", conv
 
     return conv
 
@@ -105,6 +105,7 @@ def loss_function(model, truth):
     # model = tf.reshape(model, [BATCH_SIZE, NUM_LABELS])
     # truth = tf.reshape(truth, [BATCH_SIZE, NUM_LABELS])
     loss = tf.reduce_mean(tf.div(tf.abs(model - truth), (tf.abs(truth) + 0.001)))
+    print "loss", loss
     return loss
 
 def loss_function2(model, truth):
@@ -150,17 +151,18 @@ def main(argv=None):  # pylint: disable=unused-argument
     # one constant node.
     validation_data_node = tf.constant(validation_data)
     
+    print "train_data_node", train_data_node
+    print "train_truth_node", train_truth_node
+
     # Training computation: node + cross-entropy loss.
     node = model(train_data_node, True)
-    print "node:", node
-    print node.get_shape()
 
     loss = loss_function(node, train_truth_node)
 
     learning_rate = 0.00001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
-    print "optimizer:",optimizer
 
+    return    
     # Create a local session to run this computation.
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.

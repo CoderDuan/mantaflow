@@ -8,7 +8,7 @@ VECTOR_DIM = 3
 dim = 2
 # resolution
 resC = 8
-resF = 8
+resF = 4
 # grid size
 gsC = vec3(resC+2, resC+2, resC+2)
 gsF = vec3(resF+2, resF+2, resF+2)
@@ -86,13 +86,13 @@ total = cnt + 1000
 with tf.Session() as sess:
 	mantaMsg('Loading model...')
 
-	saver = tf.train.import_meta_graph('scenes/save/cnn_test_model-396960.meta')
+	saver = tf.train.import_meta_graph('scenes/save/cnn_test_model.meta')
 	saver.restore(sess, tf.train.latest_checkpoint('scenes/save/'))
 	graph = tf.get_default_graph()
 	predict_op = graph.get_tensor_by_name('Conv2D_1:0')
 	data_node = graph.get_tensor_by_name('Placeholder:0')
 	truth_node = graph.get_tensor_by_name('Placeholder_1:0')
-	loss_op = graph.get_tensor_by_name('div:0')
+	loss_op = graph.get_tensor_by_name('Mean:0')
 
 	mantaMsg('Model loaded!')
 	globalVel = np.ndarray(shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
