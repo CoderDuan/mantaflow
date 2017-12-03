@@ -30,7 +30,7 @@ NUM_LABELS = GRID_SIZE*GRID_SIZE*VECTOR_DIM #10
 DATA_SIZE = 100
 VALIDATION_SIZE = 0#5000  # Size of the validation set.
 BATCH_SIZE = 1
-NUM_EPOCHS = 30000
+NUM_EPOCHS = 10000
 
 tf.app.flags.DEFINE_boolean("self_test", True, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
@@ -70,38 +70,7 @@ def enlarge_data(data, resC, resF):
     data = data.reshape([-1, resC*resF, VECTOR_DIM])
     return data
 
-# We will replicate the model structure for the training subgraph, as well
-# as the evaluation subgraphs, while sharing the trainable parameters.
-def model(data, train=False):
-    """The Model definition."""
-    # The variables below hold all the trainable weights. They are passed an
-    # initial value which will be assigned when when we call:
-    # {tf.initialize_all_variables().run()}
-    conv1_weights = tf.Variable(
-        tf.truncated_normal([5, 5, VECTOR_DIM*3, 32],  # 5x5 filter, depth 32.
-                            stddev=0.1,
-                            seed=SEED))
-    conv2_weights = tf.Variable(
-        tf.truncated_normal([5, 5, 32, 3],
-                            stddev=0.1,
-                            seed=SEED))
-    # 2D convolution, with 'SAME' padding (i.e. the output feature map has
-    # the same size as the input). Note that {strides} is a 4D array whose
-    # shape matches the data layout: [image index, y, x, depth].
-    conv = tf.nn.conv2d(data,
-                        conv1_weights,
-                        strides=[1, 1, 1, 1],
-                        padding='SAME')
-    # conv = tf.nn.dropout(conv, 0.95, seed=SEED)
-    conv = tf.nn.conv2d(conv,
-                        conv2_weights,
-                        strides=[1, 1, 1, 1],
-                        padding='SAME')
-    print "model", conv
-
-    return conv
-
-def model(data, train=False):
+def model(data):
     conv1_weights = tf.Variable(
         tf.truncated_normal([5, 5, VECTOR_DIM*3, 32],  # 5x5 filter, depth 32.
                             stddev=0.1,
@@ -123,7 +92,9 @@ def model(data, train=False):
 
     return conv
 
-def model2(data, train=False):
+def model2(data):
+    max_vel = tf.reduce_max(data)
+    data = data / max_vel
     conv1_weights = tf.Variable(
         tf.truncated_normal([5, 5, VECTOR_DIM*3, 16],
                             stddev=0.1,
@@ -160,12 +131,20 @@ def model2(data, train=False):
 
     reshape = tf.reshape(relu, [-1, NUM_LABELS])
     hidden = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
-    hidden = tf.nn.dropout(hidden, 0.5, seed=SEED)
-
+    
     predict = tf.matmul(hidden, fc2_weights) + fc2_biases
     predict = tf.reshape(predict, [-1, GRID_SIZE, GRID_SIZE, VECTOR_DIM])
+    predict = predict * max_vel
     print "predict", predict
-    return predict
+
+    hidden = tf.nn.dropout(hidden, 0.5, seed=SEED)
+
+    train = tf.matmul(hidden, fc2_weights) + fc2_biases
+    train = tf.reshape(train, [-1, GRID_SIZE, GRID_SIZE, VECTOR_DIM])
+    train = train * max_vel
+    print "train", train
+
+    return predict, train
 
 def loss_function(model, truth):
     # model = tf.reshape(model, [BATCH_SIZE, NUM_LABELS])
@@ -175,7 +154,7 @@ def loss_function(model, truth):
     return loss
 
 def loss_function2(model, truth):
-    SCALE = 0.95
+    SCALE = 1.0
     loss = tf.reduce_sum(tf.abs(model - truth * SCALE)) / (tf.reduce_sum(tf.abs(truth)) + 0.001)\
          + tf.abs( tf.reduce_max(tf.abs(model)) / (tf.reduce_max(tf.abs(truth) * SCALE) + 0.001) - 1.0)
     print "loss", loss
@@ -224,7 +203,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     print "train_truth_node", train_truth_node
 
     # Training computation: node + cross-entropy loss.
-    node = model2(train_data_node, True)
+    pred, node = model2(train_data_node)
 
     loss = loss_function(node, train_truth_node)
 
@@ -252,13 +231,13 @@ def main(argv=None):  # pylint: disable=unused-argument
                 [optimizer, loss],
                 feed_dict=feed_dict)
             if step % 100 == 0:
-                print 'Epoch %.3f, Minibatch loss: %.6f' % (float(step) * BATCH_SIZE / train_size, l)
+                print 'Epoch %.3f, Step %d Minibatch loss: %.6f' % (float(step) * BATCH_SIZE / train_size, step, l)
                 sys.stdout.flush()
 
             # save the model
-            if int(step+1) % 30000 == 0:
+            if int(step+1) % 10000 == 0:
                 saver = tf.train.Saver()
-        	path = saver.save(s, './save/cnn_test_model', global_step = int(step+1))
+        	path = saver.save(s, './save/cnn_test_model')#, global_step = int(step+1))
 		print 'Saving result to ' + path
 
 if __name__ == '__main__':
