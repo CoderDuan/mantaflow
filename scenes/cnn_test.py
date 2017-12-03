@@ -149,7 +149,9 @@ def model2(data):
 def loss_function(model, truth):
     # model = tf.reshape(model, [BATCH_SIZE, NUM_LABELS])
     # truth = tf.reshape(truth, [BATCH_SIZE, NUM_LABELS])
-    loss = tf.reduce_mean(tf.div(tf.abs(model - truth), (tf.abs(truth) + 0.001)))
+    diff = -tf.abs(model - truth)
+    diff = tf.nn.max_pool(diff, ksize=[1,2,2,1], strides=[1,1,1,1], padding='SAME')
+    loss = tf.reduce_mean(tf.div(-diff, (tf.abs(truth) + 0.001)))
     print "loss", loss
     return loss
 
