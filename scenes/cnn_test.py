@@ -109,8 +109,8 @@ def loss_function(model, truth):
     return loss
 
 def loss_function2(model, truth):
-    truth = tf.reshape(truth, [BATCH_SIZE, NUM_LABELS])
-    loss = tf.nn.softmax(tf.abs(model - truth))
+    loss = tf.reduce_sum(tf.abs(model - truth * 0.95)) / (tf.reduce_sum(tf.abs(truth)) + 0.001)
+    return loss
 
 def main(argv=None):  # pylint: disable=unused-argument
     # get data
@@ -157,12 +157,11 @@ def main(argv=None):  # pylint: disable=unused-argument
     # Training computation: node + cross-entropy loss.
     node = model(train_data_node, True)
 
-    loss = loss_function(node, train_truth_node)
+    loss = loss_function2(node, train_truth_node)
 
     learning_rate = 0.00001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
 
-    return    
     # Create a local session to run this computation.
     with tf.Session() as s:
         # Run all the initializers to prepare the trainable parameters.
