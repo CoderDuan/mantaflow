@@ -30,7 +30,7 @@ NUM_LABELS = GRID_SIZE*GRID_SIZE*VECTOR_DIM #10
 DATA_SIZE = 100
 VALIDATION_SIZE = 0#5000  # Size of the validation set.
 BATCH_SIZE = 1
-NUM_EPOCHS = 3000
+NUM_EPOCHS = 30000
 
 tf.app.flags.DEFINE_boolean("self_test", True, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
@@ -109,7 +109,10 @@ def loss_function(model, truth):
     return loss
 
 def loss_function2(model, truth):
-    loss = tf.reduce_sum(tf.abs(model - truth * 0.95)) / (tf.reduce_sum(tf.abs(truth)) + 0.001)
+    SCALE = 0.95
+    loss = tf.reduce_sum(tf.abs(model - truth * SCALE)) / (tf.reduce_sum(tf.abs(truth)) + 0.001)\
+         + tf.abs( tf.reduce_max(tf.abs(model)) / (tf.reduce_max(tf.abs(truth) * SCALE) + 0.001) - 1.0)
+    print "loss", loss
     return loss
 
 def main(argv=None):  # pylint: disable=unused-argument
@@ -187,9 +190,9 @@ def main(argv=None):  # pylint: disable=unused-argument
                 sys.stdout.flush()
 
             # save the model
-            if int(step+1) % 2000 == 0:
+            if int(step+1) % 30000 == 0:
                 saver = tf.train.Saver()
-        	path = saver.save(s, './save/cnn_test_model')
+        	path = saver.save(s, './save/cnn_test_model', global_step = int(step+1))
 		print 'Saving result to ' + path
 
 if __name__ == '__main__':
