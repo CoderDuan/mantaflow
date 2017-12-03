@@ -101,6 +101,72 @@ def model(data, train=False):
 
     return conv
 
+def model(data, train=False):
+    conv1_weights = tf.Variable(
+        tf.truncated_normal([5, 5, VECTOR_DIM*3, 32],  # 5x5 filter, depth 32.
+                            stddev=0.1,
+                            seed=SEED))
+    conv2_weights = tf.Variable(
+        tf.truncated_normal([5, 5, 32, 3],
+                            stddev=0.1,
+                            seed=SEED))
+
+    conv = tf.nn.conv2d(data,
+                        conv1_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    conv = tf.nn.conv2d(conv,
+                        conv2_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    print "model", conv
+
+    return conv
+
+def model2(data, train=False):
+    conv1_weights = tf.Variable(
+        tf.truncated_normal([5, 5, VECTOR_DIM*3, 16],
+                            stddev=0.1,
+                            seed=SEED))
+    conv1_biases = tf.Variable(tf.zeros([16]))
+    conv2_weights = tf.Variable(
+        tf.truncated_normal([5, 5, 16, 3],
+                            stddev=0.1,
+                            seed=SEED))
+    conv2_biases = tf.Variable(tf.constant(0.1, shape=[3]))
+    fc1_weights = tf.Variable(
+        tf.truncated_normal([NUM_LABELS, 512],
+                            stddev=0.1,
+                            seed=SEED))
+    fc1_biases = tf.Variable(tf.constant(0.1, shape=[512]))
+    fc2_weights = tf.Variable(
+        tf.truncated_normal([512, NUM_LABELS],
+                            stddev=0.1,
+                            seed=SEED))
+    fc2_biases = tf.Variable(tf.constant(0.1, shape=[NUM_LABELS]))
+
+    conv = tf.nn.conv2d(data,
+                        conv1_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    relu = tf.nn.relu(tf.nn.bias_add(conv, conv1_biases))
+
+    conv = tf.nn.conv2d(conv,
+                        conv2_weights,
+                        strides=[1, 1, 1, 1],
+                        padding='SAME')
+    relu = tf.nn.relu(tf.nn.bias_add(conv, conv2_biases))
+
+
+    reshape = tf.reshape(relu, [-1, NUM_LABELS])
+    hidden = tf.nn.relu(tf.matmul(reshape, fc1_weights) + fc1_biases)
+    hidden = tf.nn.dropout(hidden, 0.5, seed=SEED)
+
+    predict = tf.matmul(hidden, fc2_weights) + fc2_biases
+    predict = tf.reshape(predict, [-1, GRID_SIZE, GRID_SIZE, VECTOR_DIM])
+    print "predict", predict
+    return predict
+
 def loss_function(model, truth):
     # model = tf.reshape(model, [BATCH_SIZE, NUM_LABELS])
     # truth = tf.reshape(truth, [BATCH_SIZE, NUM_LABELS])
@@ -158,9 +224,9 @@ def main(argv=None):  # pylint: disable=unused-argument
     print "train_truth_node", train_truth_node
 
     # Training computation: node + cross-entropy loss.
-    node = model(train_data_node, True)
+    node = model2(train_data_node, True)
 
-    loss = loss_function2(node, train_truth_node)
+    loss = loss_function(node, train_truth_node)
 
     learning_rate = 0.00001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
