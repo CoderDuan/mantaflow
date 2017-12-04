@@ -292,12 +292,15 @@ void MultiGridSolver::gatherTrainData() {
 				for (int i = 0; i < mFineSizeEffective.x; i++) {
 					for (int j = 0; j < mFineSizeEffective.y; j++) {
 						for (int k = 0; k < mFineSizeEffective.z; k++) {
-							auto coarseOldVel = mCoarseOldVel->getAt(idx, idy, idz);
-							mCoarseOldVel_Enlarged->setAt(pos.x+i, pos.y+j, pos.z+k,
-														  coarseOldVel);
-							auto coarseNewVel = mCoarseData.mVel->getAt(idx, idy, idz);
-							mCoarseNewVel_Enlarged->setAt(pos.x+i, pos.y+j, pos.z+k,
-														  coarseNewVel);
+							auto coarseOldVel = mCoarseOldVel->getAt(
+								idx+offset.x, idy+offset.y, idz+offset.z);
+							mCoarseOldVel_Enlarged->setAt(
+								pos.x+i, pos.y+j, pos.z+k, coarseOldVel);
+							
+							auto coarseNewVel = mCoarseData.mVel->getAt(
+								idx+offset.x, idy+offset.y, idz+offset.z);
+							mCoarseNewVel_Enlarged->setAt(
+								pos.x+i, pos.y+j, pos.z+k, coarseNewVel);
 						}
 					}
 				}
