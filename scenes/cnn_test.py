@@ -72,11 +72,11 @@ def enlarge_data(data, resC, resF):
 
 def model(data):
     conv1_weights = tf.Variable(
-        tf.truncated_normal([5, 5, VECTOR_DIM*3, 32],  # 5x5 filter, depth 32.
+        tf.truncated_normal([1, 1, VECTOR_DIM*3, VECTOR_DIM*2],  # 5x5 filter, depth 32.
                             stddev=0.1,
                             seed=SEED))
     conv2_weights = tf.Variable(
-        tf.truncated_normal([5, 5, 32, 3],
+        tf.truncated_normal([1, 1, VECTOR_DIM*2, VECTOR_DIM],
                             stddev=0.1,
                             seed=SEED))
 
@@ -205,7 +205,7 @@ def main(argv=None):  # pylint: disable=unused-argument
     print "train_truth_node", train_truth_node
 
     # Training computation: node + cross-entropy loss.
-    pred, node = model2(train_data_node)
+    node = model(train_data_node)
 
     loss = loss_function(node, train_truth_node)
 
@@ -239,7 +239,7 @@ def main(argv=None):  # pylint: disable=unused-argument
             # save the model
             if int(step+1) % 10000 == 0:
                 saver = tf.train.Saver()
-        	path = saver.save(s, './save/cnn_test_model')#, global_step = int(step+1))
+                path = saver.save(s, './cnn_test_model1/cnn_test_model1')#, global_step = int(step+1))
 		print 'Saving result to ' + path
 
 if __name__ == '__main__':
