@@ -72,7 +72,7 @@ def concat_3_node(a, b, c):
     return node
 
 conv1_weights = tf.Variable(
-    tf.truncated_normal([3, 3, 3, 1],
+    tf.truncated_normal([1, 1, 3, 1],
                         stddev=0.1,
                         seed=SEED))
 
@@ -94,8 +94,8 @@ def model(coarse_old_node, coarse_new_node, global_node):
     return predict
 
 def loss_function(model, truth):
-    diff = tf.abs(model - truth)
-    loss = tf.reduce_mean(tf.div(diff, (tf.abs(truth) + 0.001)))\
+    diff = model - truth
+    loss = tf.reduce_mean(tf.div(diff*diff, (truth*truth + 0.001)))\
             + abs(tf.reduce_sum(conv1_weights) - 1.0)
     print "loss", loss
     return loss
