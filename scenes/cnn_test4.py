@@ -85,6 +85,9 @@ def model(coarse_old_node, coarse_new_node, global_node):
     x_node = concat_3_node(co_x, cn_x, gl_x)
     y_node = concat_3_node(co_y, cn_y, gl_y)
     z_node = concat_3_node(co_z, cn_z, gl_z)
+    # conv_x = - co_x + cn_x + gl_x
+    # conv_y = - co_y + cn_y + gl_y
+    # conv_z = - co_z + cn_z + gl_z
 
     conv_x = tf.nn.conv2d(x_node, conv1_weights, strides=[1, 1, 1, 1], padding='SAME')
     conv_y = tf.nn.conv2d(y_node, conv1_weights, strides=[1, 1, 1, 1], padding='SAME')
@@ -95,13 +98,19 @@ def model(coarse_old_node, coarse_new_node, global_node):
 
 def loss_function(model, truth):
     diff = model - truth
-    loss = tf.reduce_mean(tf.div(diff*diff, (truth*truth + 0.001)))\
+    diff_len = tf.sqrt(tf.reduce_sum(diff*diff, 3, keep_dims=False))
+    truth_len = tf.sqrt(tf.reduce_sum(truth*truth, 3, keep_dims=False) + 0.00001)
+    loss = tf.reduce_mean( diff_len / truth_len ) \
             + abs(tf.reduce_sum(conv1_weights) - 1.0)
     print "loss", loss
     return loss
 
 def loss_function2(model, truth):
-    loss = tf.reduce_sum(tf.abs(model - truth)) / tf.reduce_sum(tf.abs(truth))
+    diff = model - truth
+    diff_len = tf.sqrt(tf.reduce_sum(diff*diff, 3, keep_dims=False))
+    truth_len = tf.sqrt(tf.reduce_sum(truth*truth, 3, keep_dims=False) + 0.00001)
+    loss = tf.reduce_mean( diff*diff / (truth*truth+0.0001) ) \
+            + abs(tf.reduce_sum(conv1_weights) - 1.0)
     print "loss", loss
     return loss
 
@@ -132,7 +141,7 @@ def main(argv=None):
     predict = model(test_coarse_old_node, test_coarse_new_node, test_global_node)
     print "predict", predict
 
-    loss = loss_function(node, truth_node)
+    loss = loss_function2(node, truth_node)
 
     learning_rate = 0.00001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
@@ -162,16 +171,16 @@ def main(argv=None):
                 [optimizer, loss],
                 feed_dict=feed_dict)
             if step % 100 == 0:
-                # print conv1_weights.eval()
+                print tf.reshape(conv1_weights, [-1]).eval()
                 print 'Epoch %.1f, step %d, progress %.2f%% loss: %.4f'\
                     % (float(step) * BATCH_SIZE / DATA_SIZE, step, 100.*step/total_step, l)
                 sys.stdout.flush()
 
             # save the model
-            if int(step+1) % 6000 == 0:
-                saver = tf.train.Saver()
-                path = saver.save(s, './cnn_test_model4/cnn_test_model4')
-                print 'Saving result to ' + path
+            # if int(step+1) % 6000 == 0:
+            #     saver = tf.train.Saver()
+            #     path = saver.save(s, './cnn_test_model4/cnn_test_model4')
+            #     print 'Saving result to ' + path
 
 if __name__ == '__main__':
     tf.app.run()
