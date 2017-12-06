@@ -12,7 +12,7 @@ VECTOR_DIM = 3
 resC = 8
 resF = 4
 
-SEED = 66478  # Set to None for random seed.
+SEED = 12678  # Set to None for random seed.
 
 GRID_SIZE = resC*resF+2
 NUM_LABELS = GRID_SIZE*GRID_SIZE*VECTOR_DIM #10
@@ -110,7 +110,8 @@ def loss_function2(model, truth):
     diff_len = tf.sqrt(tf.reduce_sum(diff*diff, 3, keep_dims=False))
     truth_len = tf.sqrt(tf.reduce_sum(truth*truth, 3, keep_dims=False) + 0.00001)
     loss = tf.reduce_mean( diff*diff / (truth*truth+0.0001) ) \
-            + abs(tf.reduce_sum(conv1_weights) - 1.0)
+            + abs(tf.reduce_sum(conv1_weights) - 1.0) \
+            + 1. / tf.reduce_sum(conv1_weights * conv1_weights + 0.001)
     print "loss", loss
     return loss
 
@@ -143,7 +144,7 @@ def main(argv=None):
 
     loss = loss_function2(node, truth_node)
 
-    learning_rate = 0.00001
+    learning_rate = 0.0001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
     print "optimizer:",optimizer
     with tf.Session() as s:
@@ -177,10 +178,10 @@ def main(argv=None):
                 sys.stdout.flush()
 
             # save the model
-            # if int(step+1) % 6000 == 0:
-            #     saver = tf.train.Saver()
-            #     path = saver.save(s, './cnn_test_model4/cnn_test_model4')
-            #     print 'Saving result to ' + path
+            if int(step+1) % 6000 == 0:
+                saver = tf.train.Saver()
+                path = saver.save(s, './cnn_test_model4/cnn_test_model4')
+                print 'Saving result to ' + path
 
 if __name__ == '__main__':
     tf.app.run()

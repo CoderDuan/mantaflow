@@ -226,11 +226,18 @@ std::pair<Vec3, float> MultiGridSolver::calculateCoarseCell(int i, int j, int k)
 		for (int y = 1; y < mFineSize.y-1; y++) {
 			if (is3D()) { // 3D
 				for (int z = 1; z < mFineSize.z-1; z++) {
+					if ((x != 1 && x != mFineSize.x-2)
+						&& (y != 1 && y != mFineSize.y-2)
+						&& (z != 1 && z != mFineSize.z-2))
+						continue;
 					cnt++;
 					v += cell.mVel->getAt(x,y,z);
 					pressure += cell.mPressure->getAt(x,y,z);
 				}
 			} else { // 2D
+				if ((x != 1 && x != mFineSize.x-2)
+					&& (y != 1 && y != mFineSize.y-2))
+					continue;
 				cnt++;
 				v += cell.mVel->getAt(x,y,0);
 				pressure += cell.mPressure->getAt(x,y,0);
@@ -251,9 +258,13 @@ void MultiGridSolver::mapCoarseDataToFineGrid() {
 		for (int j = 0; j < mFineGridNum.y; j++) {
 			for (int k = 0; k < mFineGridNum.z; k++) {
 				FluidData &fdata = mFineDataList[fineGridIndex(i,j,k)];
-
-				Vec3 dv = (mCoarseData.mVel->getAt(i+1, j+1, k+1)
-					- mCoarseOldVel->getAt(i+1, j+1, k+1));
+				Vec3 dv = Vec3(0,0,0);
+				if (is3D())
+					dv = (mCoarseData.mVel->getAt(i+1, j+1, k+1)
+						- mCoarseOldVel->getAt(i+1, j+1, k+1));
+				else
+					dv = (mCoarseData.mVel->getAt(i+1, j+1, k)
+						- mCoarseOldVel->getAt(i+1, j+1, k));
 
 				fdata.mVel->addConst(dv);
 			}
@@ -286,7 +297,8 @@ void MultiGridSolver::gatherTrainData() {
 			for (int idz = 0; idz < mFineGridNum.z; idz++) {
 				Vec3i pos = Vec3i(idx, idy, idz) * mFineSizeEffective + offset;
 				FluidData &fdata = mFineDataList[fineGridIndex(idx,idy,idz)];
-				mGlobalVel_tmp->copyFromFine(pos, *(fdata.mVel), mFineSize);
+				mGlobalData.mVel->copyFromFine(pos, *(fdata.mVel), mFineSize);
+				mGlobalData.mPressure->copyFromFine(pos, *(fdata.mPressure), mFineSize);
 
 				// calculate enlarged coarse vel data
 				for (int i = 0; i < mFineSizeEffective.x; i++) {
