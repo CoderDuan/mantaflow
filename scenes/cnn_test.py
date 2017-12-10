@@ -17,9 +17,9 @@ SEED = 12678  # Set to None for random seed.
 GRID_SIZE = resC*resF+2
 NUM_LABELS = GRID_SIZE*GRID_SIZE*VECTOR_DIM #10
 
-DATA_SIZE = 800
-BATCH_SIZE = 20
-NUM_EPOCHS = 3000
+DATA_SIZE = 100
+BATCH_SIZE = 10
+NUM_EPOCHS = 1000
 
 tf.app.flags.DEFINE_boolean("self_test", True, "True if running a self test.")
 FLAGS = tf.app.flags.FLAGS
@@ -35,20 +35,21 @@ def load_data(filename, shape):
 def load_all_data(index):
     train_coarse_old_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
     train_coarse_new_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
-    train_global_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+    train_global_old_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
+    train_global_new_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
     truth_data = np.ndarray(shape=(DATA_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM), dtype=np.float32)
 
     shape = [GRID_SIZE, GRID_SIZE, VECTOR_DIM]
     for i in range(0, DATA_SIZE):
-        old_coarse_data = load_data("../data/coarse_old" + str(i+index) + ".txt",shape)
-        train_coarse_old_data[i] = old_coarse_data#enlarge_data(old_coarse_data, resC, resF)
+        train_coarse_old_data[i] = load_data("../data/coarse_old" + str(i+index) + ".txt",shape)
+        train_coarse_new_data[i] = load_data("../data/coarse"+str(i+index)+".txt", shape)
+        train_global_old_data[i] = load_data("../data/global_old"+str(i+index)+".txt", shape)
+        train_global_new_data[i] = load_data("../data/global"+str(i+index)+".txt", shape)
 
-        new_coarse_data = load_data("../data/coarse"+str(i+index)+".txt", shape)
-        train_coarse_new_data[i] = new_coarse_data#enlarge_data(new_coarse_data, resC, resF)
-
-        train_global_data[i] = load_data("../data/global"+str(i+index)+".txt", shape)
         truth_data[i] = load_data("../data/groundtruth"+str(i+index)+".txt", shape)
-    return train_coarse_old_data, train_coarse_new_data, train_global_data, truth_data
+    return train_coarse_old_data, train_coarse_new_data,\
+        train_global_old_data, train_global_new_data,\
+        truth_data
 
 # enlarge the matrix data by resF*resF
 def enlarge_data(data, resC, resF):
@@ -75,23 +76,38 @@ def concat_3_node(a, b, c):
     node = tf.concat([node, c], 3)
     return node
 
+def concat_4_node(a, b, c, d):
+    node = concat_3_node(a, b, c)
+    node = tf.concat([node, d], 3)
+    return node
+
 conv1_weights = tf.Variable(
-    tf.truncated_normal([1, 1, 3, 1],
+    tf.truncated_normal([3, 3, 4, 2],
                         stddev=0.1,
                         seed=SEED))
 
-def model(coarse_old_node, coarse_new_node, global_node):
+conv2_weights = tf.Variable(
+    tf.truncated_normal([3, 3, 2, 1],
+                        stddev=0.1,
+                        seed=SEED))
+
+def model(coarse_old_node, coarse_new_node, global_old_node, global_new_node):
     co_x, co_y, co_z = slice_node_by_dim(coarse_old_node)
     cn_x, cn_y, cn_z = slice_node_by_dim(coarse_new_node)
-    gl_x, gl_y, gl_z = slice_node_by_dim(global_node)
+    go_x, go_y, go_z = slice_node_by_dim(global_old_node)
+    gn_x, gn_y, gn_z = slice_node_by_dim(global_new_node)
 
-    x_node = concat_3_node(co_x, cn_x, gl_x)
-    y_node = concat_3_node(co_y, cn_y, gl_y)
-    z_node = concat_3_node(co_z, cn_z, gl_z)
+    x_node = concat_4_node(co_x, cn_x, go_x, gn_x)
+    y_node = concat_4_node(co_y, cn_y, go_y, gn_y)
+    z_node = concat_4_node(co_z, cn_z, go_z, gn_z)
 
     conv_x = tf.nn.conv2d(x_node, conv1_weights, strides=[1, 1, 1, 1], padding='SAME')
     conv_y = tf.nn.conv2d(y_node, conv1_weights, strides=[1, 1, 1, 1], padding='SAME')
     conv_z = tf.nn.conv2d(z_node, conv1_weights, strides=[1, 1, 1, 1], padding='SAME')
+
+    conv_x = tf.nn.conv2d(conv_x, conv2_weights, strides=[1, 1, 1, 1], padding='SAME')
+    conv_y = tf.nn.conv2d(conv_y, conv2_weights, strides=[1, 1, 1, 1], padding='SAME')
+    conv_z = tf.nn.conv2d(conv_z, conv2_weights, strides=[1, 1, 1, 1], padding='SAME')
 
     predict = concat_3_node(conv_x, conv_y, conv_z)
     return predict
@@ -103,8 +119,9 @@ def loss_function(model, truth):
     diff = model - truth
     diff_len = tf.sqrt(tf.reduce_sum(diff*diff, 3, keep_dims=False))
     truth_len = tf.sqrt(tf.reduce_sum(truth*truth, 3, keep_dims=False) + 0.00001)
-    loss = tf.reduce_mean( diff_len / truth_len ) \
-            + abs(tf.reduce_sum(conv1_weights) - 1.0)
+    loss = tf.reduce_mean( diff*diff / (truth*truth+0.0001) ) \
+            + abs(tf.reduce_sum(conv1_weights) - 1.0) \
+            + abs(tf.reduce_sum(conv2_weights) - 1.0)
     print "loss", loss
     return loss
 
@@ -123,7 +140,9 @@ def main(argv=None):
         shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
     coarse_new_node = tf.placeholder(tf.float32,
         shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
-    global_node = tf.placeholder(tf.float32,
+    global_old_node = tf.placeholder(tf.float32,
+        shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
+    global_new_node = tf.placeholder(tf.float32,
         shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
     truth_node = tf.placeholder(tf.float32,
         shape=(BATCH_SIZE, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
@@ -134,20 +153,24 @@ def main(argv=None):
         shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
     test_coarse_new_node = tf.placeholder(tf.float32,
         shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
-    test_global_node = tf.placeholder(tf.float32,
+    test_global_old_node = tf.placeholder(tf.float32,
+        shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
+    test_global_new_node = tf.placeholder(tf.float32,
         shape=(1, GRID_SIZE, GRID_SIZE, VECTOR_DIM))
 
     print test_coarse_old_node
     print test_coarse_new_node
-    print test_global_node
+    print test_global_old_node
+    print test_global_new_node
 
-    node = model(coarse_old_node, coarse_new_node, global_node)
-    stanford_pred = stanford_model(coarse_old_node, coarse_new_node, global_node)
-    predict = model(test_coarse_old_node, test_coarse_new_node, test_global_node)
+    node = model(coarse_old_node, coarse_new_node, global_old_node, global_new_node)
+    # stanford_pred = stanford_model(coarse_old_node, coarse_new_node, global_node)
+    predict = model(test_coarse_old_node, test_coarse_new_node,
+        test_global_old_node, test_global_new_node)
     print "predict", predict
 
-    loss = loss_function2(node, truth_node)
-    stanford_loss = loss_function2(stanford_pred, truth_node)
+    loss = loss_function(node, truth_node)
+    # stanford_loss = loss_function2(stanford_pred, truth_node)
 
     learning_rate = 0.0001
     optimizer = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss)
@@ -157,8 +180,9 @@ def main(argv=None):
         print 'Initialized!'
         # Loop through training steps.
         # get data
-        for data_index in range(0, 47):
-            coarse_old_data, coarse_new_data, global_data, truth_data = load_all_data(data_index)
+        for data_index in range(0, 1):
+            coarse_old_data, coarse_new_data, global_old_data, global_new_data,\
+                truth_data = load_all_data(data_index)
             print 'data loaded! Index:', DATA_SIZE
 
             total_step = int(NUM_EPOCHS * DATA_SIZE / BATCH_SIZE)
@@ -170,23 +194,23 @@ def main(argv=None):
                 feed_dict = {
                     coarse_old_node:coarse_old_data[offset:(offset + BATCH_SIZE), :, :, :],
                     coarse_new_node:coarse_new_data[offset:(offset + BATCH_SIZE), :, :, :],
-                    global_node:global_data[offset:(offset + BATCH_SIZE), :, :, :],
+                    global_old_node:global_old_data[offset:(offset + BATCH_SIZE), :, :, :],
+                    global_new_node:global_new_data[offset:(offset + BATCH_SIZE), :, :, :],
                     truth_node:truth_data[offset:(offset + BATCH_SIZE), :, :, :]
                 }
 
-                _, l, stf_l = s.run(
-                    [optimizer, loss, stanford_loss],
+                _, l = s.run(
+                    [optimizer, loss],
                     feed_dict=feed_dict)
                 if step % 200 == 0:
                     print tf.reshape(conv1_weights, [-1]).eval()
-                    print 'Eph. %d stp. %d prog. %.2f%% loss: %.4f stf_loss: %.4f'\
+                    print 'Eph. %d stp. %d prog. %.2f%% loss: %.4f'\
                         % (float(step)*BATCH_SIZE/DATA_SIZE, step,\
-                         100.*step/total_step, l, stf_l)
-                    print l
+                         100.*step/total_step, l)
                     sys.stdout.flush()
 
                 # save the model
-                if int(step+1) % 11072 == 0:
+                if int(step+1) % 1000 == 0:
                     saver = tf.train.Saver()
                     path = saver.save(s, './cnn_test_model1/cnn_test_model1')
                     print 'Saving result to ' + path
